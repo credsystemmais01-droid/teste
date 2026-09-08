@@ -5,13 +5,12 @@ import { setSession } from "@/lib/auth";
 
 export async function POST(request: Request) {
   const body = await request.json().catch(() => ({}));
-  const displayName = String(body.displayName || "").trim();
   const email = String(body.email || "").trim().toLowerCase();
   const password = String(body.password || "");
 
-  if (displayName.length < 2 || !email.includes("@") || password.length < 6) {
+  if (!email.includes("@") || password.length < 6) {
     return NextResponse.json(
-      { error: "Preencha nome, e-mail válido e senha com 6+ caracteres." },
+      { error: "Preencha e-mail válido e senha com 6+ caracteres." },
       { status: 400 },
     );
   }
@@ -23,10 +22,11 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Este e-mail já tem conta." }, { status: 409 });
   }
 
+  const accountLabel = email.split("@")[0] || "conta";
   const passwordHash = await bcrypt.hash(password, 10);
   const rows = await sql`
     INSERT INTO users (email, password_hash, display_name)
-    VALUES (${email}, ${passwordHash}, ${displayName})
+    VALUES (${email}, ${passwordHash}, ${accountLabel})
     RETURNING id
   `;
   await setSession(String(rows[0].id));

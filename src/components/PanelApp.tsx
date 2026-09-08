@@ -10,7 +10,8 @@ type View = "hub" | "enter" | "check" | "virus" | "remove" | "protect" | "safe";
 type Status = "disconnected" | "scanned" | "threat" | "protected";
 
 type Me = {
-  user: { displayName: string; email: string };
+  user: { panelName: string; email: string };
+  isAdmin?: boolean;
   machine: { name: string; status: Status } | null;
   symptoms: string[];
   subscription: { plan: string; status: string } | null;
@@ -136,7 +137,7 @@ export function PanelApp() {
     if (machineName.trim().length < 2) return;
     const ok = await saveMachine("scanned");
     if (!ok) return;
-    playLines(ENTER_LINES(machineName.trim(), me?.user.displayName || "usuario"), () => {
+    playLines(ENTER_LINES(machineName.trim(), me?.user.panelName || "conta"), () => {
       setUnlocked(true);
     });
   }
@@ -193,16 +194,28 @@ export function PanelApp() {
     <main className="wrap">
       <header className="site-header">
         <Brand href="/painel" />
-        <button className="btn btn-ghost" onClick={logout} type="button">
-          Sair
-        </button>
+        <div className="cta-row" style={{ marginTop: 0 }}>
+          {me.isAdmin ? (
+            <Link className="btn btn-ghost" href="/admin">
+              Admin
+            </Link>
+          ) : null}
+          <button className="btn btn-ghost" onClick={logout} type="button">
+            Sair
+          </button>
+        </div>
       </header>
 
       <div className="panel-top">
         <div>
           <p className="tiny">Painel ao vivo</p>
-          <h1>Olá, {me.user.displayName}</h1>
-          <p className="muted">Painel de proteção contínua.</p>
+          <h1>{me.user.panelName ? `Olá, ${me.user.panelName}` : "Olá"}</h1>
+          <p className="muted">
+            {me.user.panelName
+              ? "Painel de proteção contínua."
+              : "Conta conectada. O administrador ainda não definiu o nome desta conta."}
+          </p>
+          <p className="muted">Login: {me.user.email}</p>
         </div>
         <div className={`status ${status}`}>{STATUS_LABEL[status]}</div>
       </div>
@@ -350,7 +363,7 @@ export function PanelApp() {
 
       {unlocked && view === "enter" ? (
         <section className="success-card">
-          <h2>{me.user.displayName} desbloqueado e seguro</h2>
+          <h2>{me.user.panelName || "Conta"} desbloqueado e seguro</h2>
           <p>Máquina {machineName} autenticada no Limpa e Protege.</p>
         </section>
       ) : null}
@@ -371,7 +384,7 @@ export function PanelApp() {
       {(view === "safe" || paid) && (view === "safe" || view === "remove" || view === "protect") ? (
         <section className="success-card">
           <h2>
-            Escudo ativo. {me.user.displayName}, você está protegido 24 horas. Sem parar.
+            Escudo ativo. {me.user.panelName || "Sua conta"}, você está protegido 24 horas. Sem parar.
           </h2>
           <p>Dados, fotos, documentos, empresa e site — sob proteção.</p>
         </section>

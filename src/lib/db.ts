@@ -41,6 +41,11 @@ export async function ensureSchema() {
         provider_ref TEXT,
         created_at TIMESTAMPTZ DEFAULT now()
       )`;
+      await db`ALTER TABLE users ADD COLUMN IF NOT EXISTS panel_name TEXT`;
+      await db`CREATE TABLE IF NOT EXISTS settings (
+        key TEXT PRIMARY KEY,
+        value TEXT NOT NULL
+      )`;
     })().catch((error) => {
       ready = null;
       throw error;

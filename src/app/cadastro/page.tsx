@@ -19,7 +19,6 @@ export default function RegisterPage() {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        displayName: form.get("displayName"),
         email: form.get("email"),
         password: form.get("password"),
       }),
@@ -41,14 +40,13 @@ export default function RegisterPage() {
       <form className="card form" onSubmit={onSubmit}>
         <p className="tiny">Comece agora</p>
         <h1>Criar conta</h1>
-        <p className="muted">O nome de exibição aparece no card verde depois.</p>
+        <p className="muted">
+          Você entra com o e-mail da conta. O nome que aparece no painel é definido pelo
+          administrador.
+        </p>
         {error ? <p className="error">{error}</p> : null}
         <div className="field">
-          <label htmlFor="displayName">Nome de exibição</label>
-          <input id="displayName" name="displayName" required minLength={2} />
-        </div>
-        <div className="field">
-          <label htmlFor="email">E-mail</label>
+          <label htmlFor="email">E-mail da conta</label>
           <input id="email" name="email" type="email" required />
         </div>
         <div className="field">

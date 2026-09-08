@@ -17,5 +17,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/painel/:path*", "/pagamento"],
+  matcher: ["/painel/:path*", "/pagamento", "/admin/:path*"],
 };
