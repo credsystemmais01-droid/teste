@@ -313,7 +313,9 @@ button, input, textarea { font: inherit; }
   background: #05060f;
   border: 1px solid rgba(34, 211, 238, 0.28);
   border-radius: 16px;
+  height: 280px;
   min-height: 280px;
+  max-height: 280px;
   padding: 0;
   font-family: "Cascadia Mono", Consolas, monospace;
   font-size: 14px;
@@ -332,7 +334,12 @@ button, input, textarea { font: inherit; }
   font-size: 12px;
 }
 .term-dot { width: 9px; height: 9px; border-radius: 50%; }
-.term-body { padding: 16px 18px 18px; position: relative; min-height: 220px; }
+.term-body {
+  padding: 14px 18px;
+  position: relative;
+  height: 228px;
+  overflow: hidden;
+}
 .terminal::after {
   content: "";
   position: absolute;
@@ -340,7 +347,7 @@ button, input, textarea { font: inherit; }
   background: repeating-linear-gradient(to bottom, transparent 0 2px, rgba(255,255,255,0.018) 2px 4px);
   pointer-events: none;
 }
-.terminal .line { color: var(--cyan-neon); margin: 0 0 7px; }
+.terminal .line { color: var(--cyan-neon); margin: 0 0 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .terminal .line.diag { color: var(--magenta-neon); }
 .cursor {
   display: inline-block;

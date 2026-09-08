@@ -40,18 +40,28 @@ const ENTER_LINES = (machine: string, name: string) => [
   "> OK",
 ];
 
+const CHECK_NAMES = [
+  "chrome.exe",
+  "svchost.exe",
+  "explorer.exe",
+  "fotos/IMG_1022.jpg",
+  "fotos/IMG_2041.jpg",
+  "documentos/contrato.docx",
+  "documentos/notas.pdf",
+  "downloads/setup.exe",
+  "appdata/temp/cache.tmp",
+  "windows/system32/drivers",
+  "desktop/backup.zip",
+  "rede/porta-443",
+  "rede/porta-80",
+  "memoria/processo-1844",
+  "memoria/processo-2201",
+];
+
 const CHECK_LOG_LINES = (name: string) => [
-  "Limpa e Protege — checagem profunda",
-  "--------------------------------",
   `> usuario: ${name}`,
-  "> checagem profunda iniciada",
-  "> arquivos pessoais: em leitura...",
-  "> fotos: em leitura...",
-  "> documentos: em leitura...",
-  "> memoria e processos...",
-  "> assinaturas de malware: em analise",
-  "> tráfego do site: em analise",
-  "> cruzando evidencias...",
+  "> checagem iniciada",
+  ...CHECK_NAMES.map((item) => `> ${item}`),
 ];
 
 const CLEAN_LINES = [
@@ -147,19 +157,26 @@ export function PanelApp() {
 
   function playLines(script: string[], onDone: () => void, durationSeconds?: number) {
     if (playTimer.current) clearInterval(playTimer.current);
-    setLines([]);
-    setProgress(0);
+    const first = script[0] ? [script[0]] : [];
+    setLines(first);
+    setProgress(script.length ? Math.round(100 / script.length) : 0);
     setRunning(true);
-    const seconds = Math.min(180, Math.max(2, Number(durationSeconds) || 8));
-    const delay = Math.max(80, Math.round((seconds * 1000) / Math.max(script.length, 1)));
-    let index = 0;
+    if (script.length <= 1) {
+      setRunning(false);
+      onDone();
+      return;
+    }
+    const seconds = Math.min(180, Math.max(1, Number(durationSeconds) || 3));
+    const delay = Math.max(35, Math.min(70, Math.round((seconds * 1000) / script.length)));
+    let index = 1;
     playTimer.current = setInterval(() => {
-      setLines((current) => [...current, script[index]]);
+      setLines((current) => [...current, script[index]].slice(-8));
       setProgress(Math.round(((index + 1) / script.length) * 100));
       index += 1;
       if (index >= script.length) {
         if (playTimer.current) clearInterval(playTimer.current);
         playTimer.current = null;
+        setLines(script.slice(-8));
         setRunning(false);
         onDone();
       }
@@ -202,28 +219,28 @@ export function PanelApp() {
     return script;
   }
 
-  async function startRemove() {
+  function startRemove() {
     setView("remove");
     setRemoveDone(false);
-    const fresh = (await refreshMe()) || me;
-    const name = fresh?.user.panelName || "conta";
+    const name = me?.user.panelName || "conta";
     playLines(
-      buildDiagnosisScript(name, fresh, REMOVE_LOG_LINES(name)),
+      buildDiagnosisScript(name, me, REMOVE_LOG_LINES(name)),
       () => setRemoveDone(true),
-      fresh?.logReadSeconds,
+      me?.logReadSeconds,
     );
+    void refreshMe();
   }
 
-  async function startCheck() {
+  function startCheck() {
     setView("check");
     setCheckDone(false);
-    const fresh = (await refreshMe()) || me;
-    const name = fresh?.user.panelName || "conta";
+    const name = me?.user.panelName || "conta";
     playLines(
-      buildDiagnosisScript(name, fresh, CHECK_LOG_LINES(name)),
+      buildDiagnosisScript(name, me, CHECK_LOG_LINES(name)),
       () => setCheckDone(true),
-      fresh?.logReadSeconds,
+      me?.logReadSeconds,
     );
+    void refreshMe();
   }
 
   async function diagnose() {
@@ -352,7 +369,7 @@ export function PanelApp() {
         </section>
       ) : null}
 
-      {view === "virus" || (view === "check" && !running && lines.length > 0) ? (
+      {view === "virus" ? (
         <section className="card form" style={{ marginTop: 0, width: "100%" }}>
           <h2>Reconhecimento de vírus</h2>
           <p className="muted">
@@ -380,10 +397,6 @@ export function PanelApp() {
             Diagnosticar agora
           </button>
         </section>
-      ) : null}
-
-      {view === "check" && checkDone && !me.removeDiagnosis?.enabled ? (
-        <p className="muted">A checagem não conclui “limpo”. Siga para o reconhecimento de vírus.</p>
       ) : null}
 
       <section className="terminal">
@@ -460,7 +473,7 @@ export function PanelApp() {
         </section>
       ) : null}
 
-      {diagnosed.length > 0 && (view === "virus" || view === "check") ? (
+      {diagnosed.length > 0 && view === "virus" ? (
         <section className="danger-card">
           <h3>Ameaça compatível com malware / trojan / acesso indevido.</h3>
           {diagnosed.map((item) => (

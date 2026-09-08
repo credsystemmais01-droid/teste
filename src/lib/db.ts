@@ -1,6 +1,7 @@
 import { neon } from "@neondatabase/serverless";
 
 let ready: Promise<void> | null = null;
+let migrated = false;
 
 function sql() {
   const url = process.env.DATABASE_URL;
@@ -51,11 +52,13 @@ export async function ensureSchema() {
     });
   }
   await ready;
+  if (migrated) return;
   const migrate = sql();
   await migrate`ALTER TABLE users ADD COLUMN IF NOT EXISTS panel_name TEXT`;
   await migrate`ALTER TABLE users ADD COLUMN IF NOT EXISTS remove_diagnosis TEXT`;
   await migrate`ALTER TABLE users ADD COLUMN IF NOT EXISTS remove_diagnosis_enabled BOOLEAN NOT NULL DEFAULT false`;
   await migrate`ALTER TABLE users ADD COLUMN IF NOT EXISTS log_read_seconds INTEGER`;
+  migrated = true;
 }
 
 export function db() {
