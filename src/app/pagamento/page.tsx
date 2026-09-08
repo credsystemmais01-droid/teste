@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { Brand } from "@/components/Brand";
 import { PLANS } from "@/lib/symptoms";
 
 export default function PagamentoPage() {
@@ -40,15 +41,19 @@ export default function PagamentoPage() {
   return (
     <main className="wrap">
       <header className="site-header">
-        <Link className="brand" href="/painel">
-          Limpa e <span>Protege</span>
+        <Brand href="/painel" />
+        <Link className="btn btn-ghost" href="/painel">
+          Voltar ao painel
         </Link>
       </header>
-      <h1>Ativar pacote Limpa e Protege</h1>
-      <p className="muted">
-        Você está comprando proteção contínua. Depois do pagamento, o painel fica protegido
-        e a narrativa cobre arquivos, documentos e o site.
-      </p>
+      <section className="pay-hero">
+        <p className="tiny">Checkout</p>
+        <h1>Ativar pacote Limpa e Protege</h1>
+        <p className="muted">
+          Você está comprando proteção contínua. Depois do pagamento, o painel fica protegido
+          e a narrativa cobre arquivos, documentos e o site.
+        </p>
+      </section>
       {symptoms.length ? (
         <section className="card pillar" style={{ margin: "16px 0" }}>
           <h3>Sintomas que você marcou</h3>
@@ -70,8 +75,8 @@ export default function PagamentoPage() {
             type="button"
             onClick={() => setPlan(item.id)}
           >
+            <p className="tiny">{item.forWho}</p>
             <h3>{item.name}</h3>
-            <p>{item.forWho}</p>
             <p className="muted">{item.promise}</p>
             <p className="price-note">Preço a definir</p>
           </button>
@@ -84,9 +89,6 @@ export default function PagamentoPage() {
         <button className="btn btn-blue" onClick={activate} disabled={loading} type="button">
           {loading ? "Ativando..." : "Ativar pacote (demonstração)"}
         </button>
-        <Link className="btn btn-ghost" href="/painel">
-          Voltar ao painel
-        </Link>
       </div>
     </main>
   );

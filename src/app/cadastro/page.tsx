@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { Brand } from "@/components/Brand";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -35,11 +36,10 @@ export default function RegisterPage() {
   return (
     <main className="wrap">
       <header className="site-header">
-        <Link className="brand" href="/">
-          Limpa e <span>Protege</span>
-        </Link>
+        <Brand />
       </header>
       <form className="card form" onSubmit={onSubmit}>
+        <p className="tiny">Comece agora</p>
         <h1>Criar conta</h1>
         <p className="muted">O nome de exibição aparece no card verde depois.</p>
         {error ? <p className="error">{error}</p> : null}
@@ -55,10 +55,10 @@ export default function RegisterPage() {
           <label htmlFor="password">Senha</label>
           <input id="password" name="password" type="password" required minLength={6} />
         </div>
-        <button className="btn btn-purple" type="submit" disabled={loading}>
+        <button className="btn btn-purple full" type="submit" disabled={loading}>
           {loading ? "Criando..." : "Criar conta"}
         </button>
-        <p className="muted">
+        <p className="muted form-foot">
           Já tenho conta. <Link href="/login">Entrar</Link>
         </p>
       </form>

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { Brand } from "@/components/Brand";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -34,11 +35,10 @@ export default function LoginPage() {
   return (
     <main className="wrap">
       <header className="site-header">
-        <Link className="brand" href="/">
-          Limpa e <span>Protege</span>
-        </Link>
+        <Brand />
       </header>
       <form className="card form" onSubmit={onSubmit}>
+        <p className="tiny">Acesso seguro</p>
         <h1>Entrar</h1>
         <p className="muted">Acesse o painel e continue a proteção 24h.</p>
         {error ? <p className="error">{error}</p> : null}
@@ -50,10 +50,10 @@ export default function LoginPage() {
           <label htmlFor="password">Senha</label>
           <input id="password" name="password" type="password" required />
         </div>
-        <button className="btn btn-blue" type="submit" disabled={loading}>
+        <button className="btn btn-blue full" type="submit" disabled={loading}>
           {loading ? "Entrando..." : "Entrar no painel"}
         </button>
-        <p className="muted">
+        <p className="muted form-foot">
           Novo por aqui? <Link href="/cadastro">Criar conta</Link>
         </p>
       </form>

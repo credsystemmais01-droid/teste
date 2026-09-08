@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { Brand } from "@/components/Brand";
 import { SYMPTOMS } from "@/lib/symptoms";
 
 type View = "hub" | "enter" | "check" | "virus" | "remove" | "protect" | "safe";
@@ -182,8 +183,8 @@ export function PanelApp() {
 
   if (!me) {
     return (
-      <main className="wrap">
-        <p className="muted">Carregando painel...</p>
+      <main className="wrap loader">
+        <p className="muted">Abrindo o escudo 24h...</p>
       </main>
     );
   }
@@ -191,9 +192,7 @@ export function PanelApp() {
   return (
     <main className="wrap">
       <header className="site-header">
-        <Link className="brand" href="/painel">
-          Limpa e <span>Protege</span>
-        </Link>
+        <Brand href="/painel" />
         <button className="btn btn-ghost" onClick={logout} type="button">
           Sair
         </button>
@@ -201,38 +200,47 @@ export function PanelApp() {
 
       <div className="panel-top">
         <div>
+          <p className="tiny">Painel ao vivo</p>
           <h1>Olá, {me.user.displayName}</h1>
           <p className="muted">Painel de proteção contínua.</p>
         </div>
-        <div className="status">{STATUS_LABEL[status]}</div>
+        <div className={`status ${status}`}>{STATUS_LABEL[status]}</div>
       </div>
 
       <div className="actions">
-        <button className="btn btn-blue action" onClick={startEnter} type="button">
-          Entrar no computador
+        <button className="card action-card" onClick={startEnter} type="button">
+          <div className="ico">⌘</div>
+          <strong>Entrar no computador</strong>
+          <span>Leitura simulada e desbloqueio visual.</span>
         </button>
         <button
-          className="btn btn-purple action"
+          className="card action-card"
           onClick={() => {
             setView("remove");
             if (paid) startPaidAction();
           }}
           type="button"
         >
-          Remover vírus
+          <div className="ico">⊘</div>
+          <strong>Remover vírus</strong>
+          <span>Limpeza narrativa após o pacote.</span>
         </button>
         <button
-          className="btn btn-purple action"
+          className="card action-card"
           onClick={() => {
             setView("protect");
             if (paid) startPaidAction();
           }}
           type="button"
         >
-          Ativar proteção
+          <div className="ico">◈</div>
+          <strong>Ativar proteção</strong>
+          <span>Escudo 24h para arquivos e site.</span>
         </button>
-        <button className="btn btn-blue action" onClick={startCheck} type="button">
-          Fazer checagem
+        <button className="card action-card" onClick={startCheck} type="button">
+          <div className="ico">◎</div>
+          <strong>Fazer checagem</strong>
+          <span>Varredura profunda que leva ao diagnóstico.</span>
         </button>
       </div>
 
@@ -313,18 +321,30 @@ export function PanelApp() {
         </section>
       ) : null}
 
-      <section className="terminal" style={{ margin: "20px 0 12px" }}>
-        {lines.length === 0 ? (
-          <p className="muted">Console 24h. Clique em um botão para iniciar a leitura simulada.</p>
-        ) : (
-          lines.map((line, index) => (
-            <p className="line" key={`${line}-${index}`}>
-              {line}
-            </p>
-          ))
-        )}
+      <section className="terminal">
+        <div className="term-bar">
+          <span className="term-dot" style={{ background: "#f43f5e" }} />
+          <span className="term-dot" style={{ background: "#e879f9" }} />
+          <span className="term-dot" style={{ background: "#22d3ee" }} />
+          <span>Limpa e Protege — console 24h</span>
+        </div>
         <div className="progress">
           <i style={{ ["--w" as string]: `${progress}%` }} />
+        </div>
+        <div className="term-body">
+          {lines.length === 0 ? (
+            <p className="muted">
+              Console 24h. Clique em um botão para iniciar a leitura simulada.
+              <span className="cursor" />
+            </p>
+          ) : (
+            lines.map((line, index) => (
+              <p className="line" key={`${line}-${index}`}>
+                {line}
+                {index === lines.length - 1 && running ? <span className="cursor" /> : null}
+              </p>
+            ))
+          )}
         </div>
       </section>
 
