@@ -134,8 +134,8 @@ export function PanelApp() {
 
   const status = (me?.machine?.status || "disconnected") as Status;
 
-  async function saveMachine(nextStatus: Status) {
-    const name = machineName.trim();
+  async function saveMachine(nextStatus: Status, explicitName?: string) {
+    const name = (explicitName ?? machineName).trim() || "PC";
     if (name.length < 2) {
       setError("Informe o nome desta máquina.");
       return false;
@@ -146,13 +146,23 @@ export function PanelApp() {
       body: JSON.stringify({ machineName: name, status: nextStatus }),
     });
     if (!response.ok) {
-      const data = await response.json();
+      const data = await response.json().catch(() => ({}));
       setError(data.error || "Não foi possível salvar a máquina.");
       return false;
     }
     setError("");
-    await loadMe();
+    setMachineName(name);
     return true;
+  }
+
+  function stopConsole() {
+    if (playTimer.current) {
+      clearInterval(playTimer.current);
+      playTimer.current = null;
+    }
+    setRunning(false);
+    setLines([]);
+    setProgress(0);
   }
 
   function playLines(script: string[], onDone: () => void, durationSeconds?: number) {
@@ -196,17 +206,17 @@ export function PanelApp() {
     return data;
   }
 
-  async function startEnter() {
+  function startEnter() {
     setView("enter");
     setUnlocked(false);
-    if (machineName.trim().length < 2) return;
-    const ok = await saveMachine("scanned");
-    if (!ok) return;
-    const fresh = (await refreshMe()) || me;
-    const name = fresh?.user.panelName || "conta";
-    playLines(ENTER_LINES(machineName.trim(), name), () => {
-      setUnlocked(true);
-    }, fresh?.logReadSeconds);
+    setCheckDone(false);
+    setRemoveDone(false);
+    stopConsole();
+    const machine = machineName.trim() || "PC";
+    if (!machineName.trim()) setMachineName(machine);
+    const name = me?.user.panelName || "conta";
+    playLines(ENTER_LINES(machine, name), () => setUnlocked(true), me?.logReadSeconds);
+    void saveMachine("scanned", machine);
   }
 
   function buildDiagnosisScript(name: string, fresh: Me | null, base: string[]) {
