@@ -15,6 +15,7 @@ type Me = {
   machine: { name: string; status: Status } | null;
   symptoms: string[];
   subscription: { plan: string; status: string } | null;
+  removeDiagnosis?: { enabled: boolean; text: string };
 };
 
 const STATUS_LABEL: Record<Status, string> = {
@@ -54,6 +55,27 @@ const CLEAN_LINES = [
   "> escudo ativo | monitoramento continuo",
 ];
 
+const REMOVE_LOG_LINES = (name: string) => [
+  "Limpa e Protege — leitura de logs",
+  "--------------------------------",
+  `> usuario: ${name}`,
+  "> iniciando leitura de logs...",
+  "> eventlog: carregando...",
+  "> processos em memoria...",
+  "> conexoes de rede...",
+  "> arquivos temporarios...",
+  "> assinaturas de malware...",
+  "> cruzando evidencias...",
+];
+
+function diagnosisLines(text: string) {
+  const parts = text
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean);
+  return ["> --------------------------------", "> DIAGNOSTICO", ...parts.map((line) => `> ${line}`), "> fim da leitura"];
+}
+
 export function PanelApp() {
   const router = useRouter();
   const params = useSearchParams();
@@ -68,8 +90,9 @@ export function PanelApp() {
   const [other, setOther] = useState("");
   const [diagnosed, setDiagnosed] = useState<string[]>([]);
   const [error, setError] = useState("");
+  const [removeDone, setRemoveDone] = useState(false);
 
-  async function loadMe() {
+  async function loadMe(applyView = false) {
     const response = await fetch("/api/me");
     if (!response.ok) {
       router.push("/login");
@@ -79,11 +102,11 @@ export function PanelApp() {
     setMe(data);
     if (data.machine?.name) setMachineName(data.machine.name);
     if (data.symptoms?.length) setDiagnosed(data.symptoms);
-    if (data.machine?.status === "protected" || data.subscription) setView("safe");
+    if (applyView && (data.machine?.status === "protected" || data.subscription)) setView("safe");
   }
 
   useEffect(() => {
-    loadMe();
+    loadMe(true);
   }, []);
 
   useEffect(() => {
@@ -131,15 +154,44 @@ export function PanelApp() {
     }, 420);
   }
 
+  async function refreshMe() {
+    const response = await fetch("/api/me");
+    if (!response.ok) {
+      router.push("/login");
+      return null;
+    }
+    const data = (await response.json()) as Me;
+    setMe(data);
+    if (data.machine?.name) setMachineName(data.machine.name);
+    if (data.symptoms?.length) setDiagnosed(data.symptoms);
+    return data;
+  }
+
   async function startEnter() {
     setView("enter");
     setUnlocked(false);
     if (machineName.trim().length < 2) return;
     const ok = await saveMachine("scanned");
     if (!ok) return;
-    playLines(ENTER_LINES(machineName.trim(), me?.user.panelName || "conta"), () => {
+    const fresh = (await refreshMe()) || me;
+    const name = fresh?.user.panelName || "conta";
+    playLines(ENTER_LINES(machineName.trim(), name), () => {
       setUnlocked(true);
     });
+  }
+
+  async function startRemove() {
+    setView("remove");
+    setRemoveDone(false);
+    const fresh = (await refreshMe()) || me;
+    const name = fresh?.user.panelName || "conta";
+    const script = [...REMOVE_LOG_LINES(name)];
+    if (fresh?.removeDiagnosis?.enabled && fresh.removeDiagnosis.text) {
+      script.push(...diagnosisLines(fresh.removeDiagnosis.text));
+    } else {
+      script.push("> leitura concluida.");
+    }
+    playLines(script, () => setRemoveDone(true));
   }
 
   function startCheck() {
@@ -229,17 +281,10 @@ export function PanelApp() {
           <strong>Entrar no computador</strong>
           <span>Leitura simulada e desbloqueio visual.</span>
         </button>
-        <button
-          className="card action-card"
-          onClick={() => {
-            setView("remove");
-            if (paid) startPaidAction();
-          }}
-          type="button"
-        >
+        <button className="card action-card" onClick={startRemove} type="button">
           <div className="ico">⊘</div>
           <strong>Remover vírus</strong>
-          <span>Limpeza narrativa após o pacote.</span>
+          <span>Leitura de logs e diagnóstico do administrador.</span>
         </button>
         <button
           className="card action-card"
@@ -262,7 +307,7 @@ export function PanelApp() {
 
       {error ? <p className="error">{error}</p> : null}
 
-      {view === "enter" && machineName.trim().length < 2 ? (
+      {view === "enter" && !running && lines.length === 0 && !unlocked ? (
         <section className="card form" style={{ marginTop: 0 }}>
           <h2>Nome desta máquina</h2>
           <p className="muted">Você escolhe o apelido. O site não lê o Windows.</p>
@@ -314,29 +359,6 @@ export function PanelApp() {
         <p className="muted">A checagem não conclui “limpo”. Siga para o reconhecimento de vírus.</p>
       ) : null}
 
-      {(view === "remove" || view === "protect") && !paid ? (
-        <section className="danger-card">
-          <h2>Ative o pacote para continuar</h2>
-          <p>
-            Encontramos sinais compatíveis com os sintomas que você marcou. Para remover o vírus e
-            ativar a proteção Limpa e Protege no computador, nos arquivos, nos documentos e no site,
-            ative um pacote.
-          </p>
-          {diagnosed.length ? (
-            <ul>
-              {diagnosed.map((item) => (
-                <li key={item}>{item}</li>
-              ))}
-            </ul>
-          ) : (
-            <p className="muted">Ainda não há diagnóstico. Faça a checagem e marque os sintomas.</p>
-          )}
-          <Link className="btn btn-blue" href="/pagamento">
-            Pagar e proteger agora
-          </Link>
-        </section>
-      ) : null}
-
       <section className="terminal">
         <div className="term-bar">
           <span className="term-dot" style={{ background: "#f43f5e" }} />
@@ -354,15 +376,53 @@ export function PanelApp() {
               <span className="cursor" />
             </p>
           ) : (
-            lines.map((line, index) => (
-              <p className="line" key={`${line}-${index}`}>
-                {line}
-                {index === lines.length - 1 && running ? <span className="cursor" /> : null}
-              </p>
-            ))
+            lines.map((line, index) => {
+              const diagStart = lines.findIndex((item) => item === "> DIAGNOSTICO");
+              const isDiag = diagStart >= 0 && index >= diagStart;
+              return (
+                <p className={isDiag ? "line diag" : "line"} key={`${line}-${index}`}>
+                  {line}
+                  {index === lines.length - 1 && running ? <span className="cursor" /> : null}
+                </p>
+              );
+            })
           )}
         </div>
       </section>
+
+      {view === "remove" && removeDone && me.removeDiagnosis?.enabled && me.removeDiagnosis.text ? (
+        <section className="danger-card">
+          <h3>Diagnóstico do administrador</h3>
+          {me.removeDiagnosis.text.split(/\r?\n/).map((line, index) =>
+            line.trim() ? <p key={`${line}-${index}`}>{line}</p> : null,
+          )}
+        </section>
+      ) : null}
+
+      {(view === "remove" || view === "protect") && !paid && (view === "protect" || removeDone) ? (
+        <section className="danger-card">
+          <h2>Ative o pacote para continuar</h2>
+          <p>
+            Encontramos sinais compatíveis com os sintomas que você marcou. Para remover o vírus e
+            ativar a proteção Limpa e Protege no computador, nos arquivos, nos documentos e no site,
+            ative um pacote.
+          </p>
+          {diagnosed.length ? (
+            <ul>
+              {diagnosed.map((item) => (
+                <li key={item}>{item}</li>
+              ))}
+            </ul>
+          ) : me.removeDiagnosis?.enabled ? (
+            <p className="muted">O resultado da leitura está no console acima.</p>
+          ) : (
+            <p className="muted">Ainda não há sintomas marcados. Faça a checagem se quiser complementar.</p>
+          )}
+          <Link className="btn btn-blue" href="/pagamento">
+            Pagar e proteger agora
+          </Link>
+        </section>
+      ) : null}
 
       {unlocked && view === "enter" ? (
         <section className="success-card">
@@ -384,7 +444,7 @@ export function PanelApp() {
         </section>
       ) : null}
 
-      {(view === "safe" || paid) && (view === "safe" || view === "remove" || view === "protect") ? (
+      {(view === "safe" || view === "protect" || (view === "remove" && removeDone)) && paid ? (
         <section className="success-card">
           <h2>
             Escudo ativo. {me.user.panelName || "Sua conta"}, você está protegido 24 horas. Sem parar.

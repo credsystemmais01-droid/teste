@@ -42,6 +42,8 @@ export async function ensureSchema() {
         created_at TIMESTAMPTZ DEFAULT now()
       )`;
       await db`ALTER TABLE users ADD COLUMN IF NOT EXISTS panel_name TEXT`;
+      await db`ALTER TABLE users ADD COLUMN IF NOT EXISTS remove_diagnosis TEXT`;
+      await db`ALTER TABLE users ADD COLUMN IF NOT EXISTS remove_diagnosis_enabled BOOLEAN NOT NULL DEFAULT false`;
       await db`CREATE TABLE IF NOT EXISTS settings (
         key TEXT PRIMARY KEY,
         value TEXT NOT NULL

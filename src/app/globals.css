@@ -341,6 +341,7 @@ button, input, textarea { font: inherit; }
   pointer-events: none;
 }
 .terminal .line { color: var(--cyan-neon); margin: 0 0 7px; }
+.terminal .line.diag { color: var(--magenta-neon); }
 .cursor {
   display: inline-block;
   width: 8px;
@@ -424,6 +425,22 @@ button, input, textarea { font: inherit; }
   gap: 16px;
   align-items: end;
   padding: 18px;
+}
+.admin-account {
+  display: grid;
+  gap: 14px;
+  padding: 22px;
+}
+.admin-toggle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+.field textarea {
+  min-height: 120px;
+  resize: vertical;
 }
 
 .loader {

@@ -23,14 +23,44 @@ export async function requireAdmin() {
   return { id: String(user.id), email: String(user.email) };
 }
 
-export async function getDefaultPanelName() {
+export async function getSetting(key: string) {
   await ensureSchema();
-  const rows = await db()`SELECT value FROM settings WHERE key = 'default_panel_name' LIMIT 1`;
+  const rows = await db()`SELECT value FROM settings WHERE key = ${key} LIMIT 1`;
   return rows[0] ? String(rows[0].value) : "";
+}
+
+export async function upsertSetting(key: string, value: string) {
+  await ensureSchema();
+  const sql = db();
+  await sql`
+    INSERT INTO settings (key, value)
+    VALUES (${key}, ${value})
+    ON CONFLICT (key) DO UPDATE SET value = ${value}
+  `;
+}
+
+export async function getDefaultPanelName() {
+  return getSetting("default_panel_name");
+}
+
+export async function getDefaultRemoveDiagnosis() {
+  return getSetting("default_remove_diagnosis");
 }
 
 export function resolvePanelName(userPanelName: unknown, defaultName: string) {
   const chosen = String(userPanelName || "").trim();
   if (chosen) return chosen;
   return defaultName.trim();
+}
+
+export function resolveRemoveDiagnosis(
+  userText: unknown,
+  enabled: unknown,
+  defaultText: string,
+) {
+  const on = enabled === true || enabled === "t" || enabled === "true";
+  if (!on) return { enabled: false, text: "" };
+  const text = String(userText || "").trim() || defaultText.trim();
+  if (!text) return { enabled: false, text: "" };
+  return { enabled: true, text };
 }

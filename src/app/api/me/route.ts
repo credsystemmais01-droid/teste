@@ -1,7 +1,13 @@
 import { NextResponse } from "next/server";
 import { getUserId } from "@/lib/auth";
 import { db, ensureSchema } from "@/lib/db";
-import { getDefaultPanelName, isAdminEmail, resolvePanelName } from "@/lib/admin";
+import {
+  getDefaultPanelName,
+  getDefaultRemoveDiagnosis,
+  isAdminEmail,
+  resolvePanelName,
+  resolveRemoveDiagnosis,
+} from "@/lib/admin";
 
 export async function GET() {
   const userId = await getUserId();
@@ -10,7 +16,8 @@ export async function GET() {
   await ensureSchema();
   const sql = db();
   const users = await sql`
-    SELECT id, email, panel_name FROM users WHERE id = ${userId} LIMIT 1
+    SELECT id, email, panel_name, remove_diagnosis, remove_diagnosis_enabled
+    FROM users WHERE id = ${userId} LIMIT 1
   `;
   const user = users[0];
   if (!user) return NextResponse.json({ error: "Conta não encontrada" }, { status: 401 });
@@ -32,7 +39,13 @@ export async function GET() {
   `;
 
   const defaultName = await getDefaultPanelName();
+  const defaultDiagnosis = await getDefaultRemoveDiagnosis();
   const panelName = resolvePanelName(user.panel_name, defaultName);
+  const removeDiagnosis = resolveRemoveDiagnosis(
+    user.remove_diagnosis,
+    user.remove_diagnosis_enabled,
+    defaultDiagnosis,
+  );
 
   return NextResponse.json({
     user: {
@@ -40,6 +53,7 @@ export async function GET() {
       email: user.email,
       panelName,
     },
+    removeDiagnosis,
     isAdmin: isAdminEmail(String(user.email)),
     machine: machines[0]
       ? { id: machines[0].id, name: machines[0].machine_name, status: machines[0].status }
