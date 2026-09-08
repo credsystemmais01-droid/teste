@@ -53,6 +53,22 @@ export function resolvePanelName(userPanelName: unknown, defaultName: string) {
   return defaultName.trim();
 }
 
+export function clampLogSeconds(value: unknown, fallback = 8) {
+  const n = Number(value);
+  if (!Number.isFinite(n) || n <= 0) return fallback;
+  return Math.min(180, Math.max(2, Math.round(n)));
+}
+
+export function resolveLogReadSeconds(userSeconds: unknown, defaultSeconds: unknown) {
+  const userN = Number(userSeconds);
+  if (Number.isFinite(userN) && userN > 0) return clampLogSeconds(userN);
+  return clampLogSeconds(defaultSeconds, 8);
+}
+
+export async function getDefaultLogReadSeconds() {
+  return clampLogSeconds(await getSetting("default_log_read_seconds"), 8);
+}
+
 export function resolveRemoveDiagnosis(
   userText: unknown,
   enabled: unknown,

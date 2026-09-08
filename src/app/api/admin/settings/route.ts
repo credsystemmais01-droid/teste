@@ -13,6 +13,13 @@ export async function PATCH(request: Request) {
   if (body.defaultRemoveDiagnosis !== undefined) {
     await upsertSetting("default_remove_diagnosis", String(body.defaultRemoveDiagnosis || "").trim());
   }
+  if (body.defaultLogReadSeconds !== undefined) {
+    const seconds = Number(body.defaultLogReadSeconds);
+    await upsertSetting(
+      "default_log_read_seconds",
+      String(Number.isFinite(seconds) && seconds > 0 ? Math.min(180, Math.max(2, Math.round(seconds))) : 8),
+    );
+  }
 
   return NextResponse.json({ ok: true });
 }

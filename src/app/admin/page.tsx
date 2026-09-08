@@ -13,18 +13,22 @@ type AdminUser = {
   removeDiagnosis: string;
   removeDiagnosisEnabled: boolean;
   resolvedDiagnosis: string;
+  logReadSeconds: number | "";
+  resolvedLogReadSeconds: number;
 };
 
 type UserDraft = {
   panelName: string;
   removeDiagnosis: string;
   removeDiagnosisEnabled: boolean;
+  logReadSeconds: string;
 };
 
 export default function AdminPage() {
   const router = useRouter();
   const [defaultName, setDefaultName] = useState("");
   const [defaultDiagnosis, setDefaultDiagnosis] = useState("");
+  const [defaultLogReadSeconds, setDefaultLogReadSeconds] = useState("8");
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [drafts, setDrafts] = useState<Record<string, UserDraft>>({});
   const [error, setError] = useState("");
@@ -49,6 +53,7 @@ export default function AdminPage() {
     const data = await response.json();
     setDefaultName(data.defaultPanelName || "");
     setDefaultDiagnosis(data.defaultRemoveDiagnosis || "");
+    setDefaultLogReadSeconds(String(data.defaultLogReadSeconds || 8));
     setUsers(data.users || []);
     setDrafts(
       Object.fromEntries(
@@ -58,6 +63,9 @@ export default function AdminPage() {
             panelName: user.panelName,
             removeDiagnosis: user.removeDiagnosis,
             removeDiagnosisEnabled: user.removeDiagnosisEnabled,
+            logReadSeconds: user.logReadSeconds === "" || user.logReadSeconds == null
+              ? ""
+              : String(user.logReadSeconds),
           },
         ]),
       ),
@@ -83,6 +91,7 @@ export default function AdminPage() {
       body: JSON.stringify({
         defaultPanelName: defaultName,
         defaultRemoveDiagnosis: defaultDiagnosis,
+        defaultLogReadSeconds,
       }),
     });
     if (!response.ok) {
@@ -104,6 +113,7 @@ export default function AdminPage() {
         panelName: draft?.panelName || "",
         removeDiagnosis: draft?.removeDiagnosis || "",
         removeDiagnosisEnabled: Boolean(draft?.removeDiagnosisEnabled),
+        logReadSeconds: draft?.logReadSeconds || "",
       }),
     });
     if (!response.ok) {
@@ -132,9 +142,9 @@ export default function AdminPage() {
         <p className="tiny">Administração</p>
         <h1>Nome e diagnóstico do console</h1>
         <p className="muted">
-          O cliente entra com o e-mail. O nome que você escrever aparece no CMD de “Entrar no
-          computador”. O diagnóstico que você escrever e habilitar aparece no fim da leitura de
-          logs de “Remover vírus”.
+          O cliente entra com o e-mail. O nome aparece no CMD. O diagnóstico habilitado aparece no
+          fim da leitura de “Fazer checagem” e de “Remover vírus”. O tempo da leitura é o que você
+          definir aqui.
         </p>
       </section>
 
@@ -144,8 +154,8 @@ export default function AdminPage() {
       <section className="card form" style={{ width: "100%", maxWidth: "none" }}>
         <h2>Pronto para usar</h2>
         <p className="muted">
-          Nome padrão e um diagnóstico já escrito. Em cada conta você escolhe se o log dele mostra
-          esse resultado.
+          Nome, diagnóstico pronto e tempo padrão da leitura. Em cada conta você escolhe o texto, se
+          aparece no log e quantos segundos dura a leitura.
         </p>
         <div className="field">
           <label htmlFor="defaultName">Nome padrão do painel / CMD</label>
@@ -157,12 +167,23 @@ export default function AdminPage() {
           />
         </div>
         <div className="field">
-          <label htmlFor="defaultDiagnosis">Diagnóstico pronto (log Remover vírus)</label>
+          <label htmlFor="defaultDiagnosis">Diagnóstico pronto (checagem e remover vírus)</label>
           <textarea
             id="defaultDiagnosis"
             value={defaultDiagnosis}
             onChange={(event) => setDefaultDiagnosis(event.target.value)}
             placeholder="Ex.: Trojan em pasta temporária. Sessão suspeita na porta 445. Recomendado isolar e ativar o pacote."
+          />
+        </div>
+        <div className="field">
+          <label htmlFor="defaultLogReadSeconds">Tempo padrão da leitura do log (segundos)</label>
+          <input
+            id="defaultLogReadSeconds"
+            type="number"
+            min={2}
+            max={180}
+            value={defaultLogReadSeconds}
+            onChange={(event) => setDefaultLogReadSeconds(event.target.value)}
           />
         </div>
         <button className="btn btn-blue" type="button" onClick={saveDefaults}>
@@ -176,6 +197,7 @@ export default function AdminPage() {
             panelName: "",
             removeDiagnosis: "",
             removeDiagnosisEnabled: false,
+            logReadSeconds: "",
           };
           return (
             <article className="card admin-account" key={user.id}>
@@ -186,6 +208,7 @@ export default function AdminPage() {
                   {user.removeDiagnosisEnabled
                     ? " · diagnóstico habilitado neste log"
                     : " · diagnóstico desligado neste log"}
+                  {` · leitura em ${user.resolvedLogReadSeconds}s`}
                 </p>
               </div>
               <div className="field" style={{ margin: 0 }}>
@@ -198,7 +221,7 @@ export default function AdminPage() {
                 />
               </div>
               <div className="field" style={{ margin: 0 }}>
-                <label htmlFor={`diag-${user.id}`}>Resultado do log Remover vírus</label>
+                <label htmlFor={`diag-${user.id}`}>Diagnóstico no fim da checagem e do remover vírus</label>
                 <textarea
                   id={`diag-${user.id}`}
                   value={draft.removeDiagnosis}
@@ -218,6 +241,18 @@ export default function AdminPage() {
                 />
                 Mostrar este diagnóstico no log desta conta
               </label>
+              <div className="field" style={{ margin: 0 }}>
+                <label htmlFor={`time-${user.id}`}>Tempo da leitura do log (segundos)</label>
+                <input
+                  id={`time-${user.id}`}
+                  type="number"
+                  min={2}
+                  max={180}
+                  value={draft.logReadSeconds}
+                  onChange={(event) => patchDraft(user.id, { logReadSeconds: event.target.value })}
+                  placeholder={`Padrão: ${defaultLogReadSeconds}s`}
+                />
+              </div>
               <button className="btn btn-purple" type="button" onClick={() => saveUser(user.id)}>
                 Salvar esta conta
               </button>

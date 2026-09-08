@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Brand } from "@/components/Brand";
 import { SYMPTOMS } from "@/lib/symptoms";
@@ -16,6 +16,7 @@ type Me = {
   symptoms: string[];
   subscription: { plan: string; status: string } | null;
   removeDiagnosis?: { enabled: boolean; text: string };
+  logReadSeconds?: number;
 };
 
 const STATUS_LABEL: Record<Status, string> = {
@@ -39,13 +40,18 @@ const ENTER_LINES = (machine: string, name: string) => [
   "> OK",
 ];
 
-const CHECK_LINES = [
+const CHECK_LOG_LINES = (name: string) => [
+  "Limpa e Protege — checagem profunda",
+  "--------------------------------",
+  `> usuario: ${name}`,
   "> checagem profunda iniciada",
-  "> arquivos pessoais: OK (simulado)",
-  "> fotos: OK (simulado)",
-  "> documentos: OK (simulado)",
+  "> arquivos pessoais: em leitura...",
+  "> fotos: em leitura...",
+  "> documentos: em leitura...",
+  "> memoria e processos...",
   "> assinaturas de malware: em analise",
   "> tráfego do site: em analise",
+  "> cruzando evidencias...",
 ];
 
 const CLEAN_LINES = [
@@ -91,6 +97,8 @@ export function PanelApp() {
   const [diagnosed, setDiagnosed] = useState<string[]>([]);
   const [error, setError] = useState("");
   const [removeDone, setRemoveDone] = useState(false);
+  const [checkDone, setCheckDone] = useState(false);
+  const playTimer = useRef<ReturnType<typeof setInterval> | null>(null);
 
   async function loadMe(applyView = false) {
     const response = await fetch("/api/me");
@@ -137,21 +145,25 @@ export function PanelApp() {
     return true;
   }
 
-  function playLines(script: string[], onDone: () => void) {
+  function playLines(script: string[], onDone: () => void, durationSeconds?: number) {
+    if (playTimer.current) clearInterval(playTimer.current);
     setLines([]);
     setProgress(0);
     setRunning(true);
+    const seconds = Math.min(180, Math.max(2, Number(durationSeconds) || 8));
+    const delay = Math.max(80, Math.round((seconds * 1000) / Math.max(script.length, 1)));
     let index = 0;
-    const timer = setInterval(() => {
+    playTimer.current = setInterval(() => {
       setLines((current) => [...current, script[index]]);
       setProgress(Math.round(((index + 1) / script.length) * 100));
       index += 1;
       if (index >= script.length) {
-        clearInterval(timer);
+        if (playTimer.current) clearInterval(playTimer.current);
+        playTimer.current = null;
         setRunning(false);
         onDone();
       }
-    }, 420);
+    }, delay);
   }
 
   async function refreshMe() {
@@ -177,7 +189,17 @@ export function PanelApp() {
     const name = fresh?.user.panelName || "conta";
     playLines(ENTER_LINES(machineName.trim(), name), () => {
       setUnlocked(true);
-    });
+    }, fresh?.logReadSeconds);
+  }
+
+  function buildDiagnosisScript(name: string, fresh: Me | null, base: string[]) {
+    const script = [...base];
+    if (fresh?.removeDiagnosis?.enabled && fresh.removeDiagnosis.text) {
+      script.push(...diagnosisLines(fresh.removeDiagnosis.text));
+    } else {
+      script.push("> leitura concluida.");
+    }
+    return script;
   }
 
   async function startRemove() {
@@ -185,18 +207,23 @@ export function PanelApp() {
     setRemoveDone(false);
     const fresh = (await refreshMe()) || me;
     const name = fresh?.user.panelName || "conta";
-    const script = [...REMOVE_LOG_LINES(name)];
-    if (fresh?.removeDiagnosis?.enabled && fresh.removeDiagnosis.text) {
-      script.push(...diagnosisLines(fresh.removeDiagnosis.text));
-    } else {
-      script.push("> leitura concluida.");
-    }
-    playLines(script, () => setRemoveDone(true));
+    playLines(
+      buildDiagnosisScript(name, fresh, REMOVE_LOG_LINES(name)),
+      () => setRemoveDone(true),
+      fresh?.logReadSeconds,
+    );
   }
 
-  function startCheck() {
+  async function startCheck() {
     setView("check");
-    playLines(CHECK_LINES, () => undefined);
+    setCheckDone(false);
+    const fresh = (await refreshMe()) || me;
+    const name = fresh?.user.panelName || "conta";
+    playLines(
+      buildDiagnosisScript(name, fresh, CHECK_LOG_LINES(name)),
+      () => setCheckDone(true),
+      fresh?.logReadSeconds,
+    );
   }
 
   async function diagnose() {
@@ -301,7 +328,7 @@ export function PanelApp() {
         <button className="card action-card" onClick={startCheck} type="button">
           <div className="ico">◎</div>
           <strong>Fazer checagem</strong>
-          <span>Varredura profunda que leva ao diagnóstico.</span>
+          <span>Leitura de logs e diagnóstico definido para esta conta.</span>
         </button>
       </div>
 
@@ -355,7 +382,7 @@ export function PanelApp() {
         </section>
       ) : null}
 
-      {view === "check" && !running && lines.length > 0 ? (
+      {view === "check" && checkDone && !me.removeDiagnosis?.enabled ? (
         <p className="muted">A checagem não conclui “limpo”. Siga para o reconhecimento de vírus.</p>
       ) : null}
 
@@ -390,7 +417,9 @@ export function PanelApp() {
         </div>
       </section>
 
-      {view === "remove" && removeDone && me.removeDiagnosis?.enabled && me.removeDiagnosis.text ? (
+      {((view === "remove" && removeDone) || (view === "check" && checkDone)) &&
+      me.removeDiagnosis?.enabled &&
+      me.removeDiagnosis.text ? (
         <section className="danger-card">
           <h3>Diagnóstico do administrador</h3>
           {me.removeDiagnosis.text.split(/\r?\n/).map((line, index) =>

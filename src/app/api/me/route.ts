@@ -2,9 +2,11 @@ import { NextResponse } from "next/server";
 import { getUserId } from "@/lib/auth";
 import { db, ensureSchema } from "@/lib/db";
 import {
+  getDefaultLogReadSeconds,
   getDefaultPanelName,
   getDefaultRemoveDiagnosis,
   isAdminEmail,
+  resolveLogReadSeconds,
   resolvePanelName,
   resolveRemoveDiagnosis,
 } from "@/lib/admin";
@@ -16,7 +18,7 @@ export async function GET() {
   await ensureSchema();
   const sql = db();
   const users = await sql`
-    SELECT id, email, panel_name, remove_diagnosis, remove_diagnosis_enabled
+    SELECT id, email, panel_name, remove_diagnosis, remove_diagnosis_enabled, log_read_seconds
     FROM users WHERE id = ${userId} LIMIT 1
   `;
   const user = users[0];
@@ -40,6 +42,7 @@ export async function GET() {
 
   const defaultName = await getDefaultPanelName();
   const defaultDiagnosis = await getDefaultRemoveDiagnosis();
+  const defaultLogReadSeconds = await getDefaultLogReadSeconds();
   const panelName = resolvePanelName(user.panel_name, defaultName);
   const removeDiagnosis = resolveRemoveDiagnosis(
     user.remove_diagnosis,
@@ -54,6 +57,7 @@ export async function GET() {
       panelName,
     },
     removeDiagnosis,
+    logReadSeconds: resolveLogReadSeconds(user.log_read_seconds, defaultLogReadSeconds),
     isAdmin: isAdminEmail(String(user.email)),
     machine: machines[0]
       ? { id: machines[0].id, name: machines[0].machine_name, status: machines[0].status }
