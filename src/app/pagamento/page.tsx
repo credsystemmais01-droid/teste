@@ -42,9 +42,14 @@ export default function PagamentoPage() {
     <main className="wrap">
       <header className="site-header">
         <Brand href="/painel" />
-        <Link className="btn btn-ghost" href="/painel">
-          Voltar ao painel
-        </Link>
+        <div className="header-nav">
+          <Link className="btn btn-ghost" href="/blog">
+            Blog
+          </Link>
+          <Link className="btn btn-ghost" href="/painel">
+            Voltar ao painel
+          </Link>
+        </div>
       </header>
       <section className="pay-hero">
         <p className="tiny">Checkout</p>

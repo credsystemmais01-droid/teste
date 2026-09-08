@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Brand } from "@/components/Brand";
+import { SiteNav } from "@/components/SiteNav";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -34,9 +34,7 @@ export default function RegisterPage() {
 
   return (
     <main className="wrap">
-      <header className="site-header">
-        <Brand />
-      </header>
+      <SiteNav extra="none" />
       <form className="card form" onSubmit={onSubmit}>
         <p className="tiny">Comece agora</p>
         <h1>Criar conta</h1>

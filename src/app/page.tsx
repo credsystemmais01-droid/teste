@@ -1,16 +1,13 @@
 import Link from "next/link";
-import { Brand } from "@/components/Brand";
+import { SiteNav } from "@/components/SiteNav";
+import { SiteFooter } from "@/components/SiteFooter";
 import { ShieldVisual } from "@/components/ShieldVisual";
+import { POSTS } from "@/lib/blog";
 
 export default function HomePage() {
   return (
     <main className="wrap">
-      <header className="site-header">
-        <Brand />
-        <Link className="btn btn-ghost" href="/login">
-          Já tenho conta
-        </Link>
-      </header>
+      <SiteNav />
 
       <section className="hero">
         <div>
@@ -29,6 +26,9 @@ export default function HomePage() {
             </Link>
             <Link className="btn btn-ghost" href="/login">
               Entrar no painel
+            </Link>
+            <Link className="btn btn-purple" href="/blog">
+              Blog
             </Link>
           </div>
           <div className="stats">
@@ -67,10 +67,32 @@ export default function HomePage() {
         </article>
       </section>
 
-      <footer className="site-footer">
-        <Brand />
-        <span className="muted">Seu computador 24 horas. Sem parar.</span>
-      </footer>
+      <section className="blog-home">
+        <div className="pay-hero">
+          <p className="tiny">Sistema Guardião</p>
+          <h2>Quer conhecer e ler mais?</h2>
+          <p className="muted">
+            O blog detalha cada serviço: destrava acessos, atualiza drivers, atualiza
+            softwares, faz o checkout e explica o Guardião 24 horas.
+          </p>
+        </div>
+        <div className="blog-grid">
+          {POSTS.map((post) => (
+            <article className="card blog-card" key={post.slug}>
+              <p className="tiny">{post.category}</p>
+              <h3>
+                <Link href={`/blog/${post.slug}`}>{post.title}</Link>
+              </h3>
+              <p className="muted">{post.excerpt}</p>
+              <Link className="btn btn-ghost" href={`/blog/${post.slug}`}>
+                Ler artigo
+              </Link>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <SiteFooter />
     </main>
   );
 }

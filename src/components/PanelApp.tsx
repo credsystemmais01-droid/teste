@@ -195,6 +195,9 @@ export function PanelApp() {
       <header className="site-header">
         <Brand href="/painel" />
         <div className="cta-row" style={{ marginTop: 0 }}>
+          <Link className="btn btn-ghost" href="/blog">
+            Blog
+          </Link>
           {me.isAdmin ? (
             <Link className="btn btn-ghost" href="/admin">
               Admin

@@ -61,6 +61,13 @@ button, input, textarea { font: inherit; }
   gap: 16px;
   padding: 22px 0;
 }
+.header-nav, .footer-nav {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.footer-nav a { color: var(--cyan-neon); font-size: 14px; }
 .site-header {
   position: sticky;
   top: 0;
@@ -389,6 +396,27 @@ button, input, textarea { font: inherit; }
 }
 .price-note { font-size: 13px; color: var(--violet-glow); }
 .pay-hero { padding: 12px 0 8px; max-width: 680px; }
+.blog-home { padding: 8px 0 24px; }
+.blog-home h2 { margin: 8px 0 10px; font-size: 32px; letter-spacing: -0.03em; }
+.blog-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  margin: 20px 0 64px;
+}
+.blog-card { padding: 22px; display: flex; flex-direction: column; gap: 10px; }
+.blog-card h2, .blog-card h3 { margin: 0; font-size: 20px; line-height: 1.25; }
+.blog-card h2 a, .blog-card h3 a { color: var(--text-primary); }
+.blog-card h2 a:hover, .blog-card h3 a:hover { color: var(--cyan-neon); }
+.blog-card .btn { align-self: flex-start; margin-top: 6px; }
+.blog-meta { color: var(--violet-glow); font-size: 13px; margin: 0; }
+.article { max-width: 760px; padding: 12px 0 24px; }
+.article h1 { margin: 8px 0 10px; font-size: clamp(32px, 5vw, 48px); letter-spacing: -0.03em; }
+.article h2 { margin: 28px 0 10px; font-size: 24px; }
+.article p { color: var(--text-muted); line-height: 1.7; font-size: 17px; }
+.article ul { color: var(--text-muted); line-height: 1.7; padding-left: 20px; }
+.article li { margin: 8px 0; }
+.blog-more { margin-top: 12px; }
 .admin-list { display: grid; gap: 12px; margin: 24px 0 80px; }
 .admin-row {
   display: grid;
@@ -418,7 +446,7 @@ button, input, textarea { font: inherit; }
 }
 
 @media (max-width: 860px) {
-  .hero, .pillars, .actions, .plans { grid-template-columns: 1fr; }
+  .hero, .pillars, .actions, .plans, .blog-grid { grid-template-columns: 1fr; }
   .shield-stage { height: 320px; }
   .ring-c { display: none; }
   .panel-top { flex-direction: column; align-items: flex-start; }
