@@ -3,6 +3,7 @@ import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
 import { ShieldVisual } from "@/components/ShieldVisual";
 import { POSTS } from "@/lib/blog";
+import { ANNUAL, INSTALLMENT_LABEL, PRICE_LABEL } from "@/lib/pricing";
 
 export default function HomePage() {
   return (
@@ -64,6 +65,26 @@ export default function HomePage() {
           <div className="ico">◎</div>
           <h3>Site e rede</h3>
           <p>Protege seu site de ataques, hackers, malwares e trojans.</p>
+        </article>
+      </section>
+
+      <section className="price-home">
+        <article className="card price-card">
+          <p className="tiny">Preço único · uso anual</p>
+          <h2>Limpa e Protege Anual</h2>
+          <p className="price-big">{PRICE_LABEL}</p>
+          <p className="price-note">
+            ou {ANNUAL.installmentCount}x de {INSTALLMENT_LABEL}
+          </p>
+          <p className="muted">{ANNUAL.promise}</p>
+          <div className="cta-row">
+            <Link className="btn btn-blue" href="/cadastro">
+              Assinar agora
+            </Link>
+            <Link className="btn btn-ghost" href="/pagamento">
+              Ir ao checkout
+            </Link>
+          </div>
         </article>
       </section>
 

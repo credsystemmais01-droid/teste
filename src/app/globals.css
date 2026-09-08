@@ -402,7 +402,23 @@ button, input, textarea { font: inherit; }
   border-color: var(--cyan-neon);
   box-shadow: 0 0 24px rgba(34, 211, 238, 0.16);
 }
-.price-note { font-size: 13px; color: var(--violet-glow); }
+.price-home { padding: 8px 0 40px; }
+.price-card {
+  padding: 28px;
+  max-width: 560px;
+  margin: 12px 0 28px;
+}
+.price-big {
+  margin: 8px 0 4px;
+  font-size: clamp(40px, 7vw, 64px);
+  letter-spacing: -0.04em;
+  background: linear-gradient(90deg, #f4f7ff, #38bdf8 50%, #c084fc);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.price-points { color: var(--text-muted); line-height: 1.7; padding-left: 18px; }
+.price-note { font-size: 18px; color: var(--violet-glow); font-weight: 600; }
 .pay-hero { padding: 12px 0 8px; max-width: 680px; }
 .blog-home { padding: 8px 0 24px; }
 .blog-home h2 { margin: 8px 0 10px; font-size: 32px; letter-spacing: -0.03em; }

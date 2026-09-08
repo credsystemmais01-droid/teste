@@ -2,13 +2,10 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 import { Brand } from "@/components/Brand";
-import { PLANS } from "@/lib/symptoms";
+import { ANNUAL, INSTALLMENT_LABEL, PRICE_LABEL } from "@/lib/pricing";
 
 export default function PagamentoPage() {
-  const router = useRouter();
-  const [plan, setPlan] = useState<(typeof PLANS)[number]["id"]>("residencial");
   const [symptoms, setSymptoms] = useState<string[]>([]);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -21,21 +18,21 @@ export default function PagamentoPage() {
       });
   }, []);
 
-  async function activate() {
+  async function pay() {
     setLoading(true);
     setError("");
-    const response = await fetch("/api/subscribe", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ plan }),
-    });
+    const response = await fetch("/api/stripe/checkout", { method: "POST" });
     const data = await response.json();
     setLoading(false);
     if (!response.ok) {
-      setError(data.error || "Não foi possível ativar o pacote.");
+      setError(data.error || "Não foi possível abrir o pagamento.");
       return;
     }
-    router.push("/painel?view=safe");
+    if (data.url) {
+      window.location.href = data.url;
+      return;
+    }
+    setError("Stripe não devolveu a página de pagamento.");
   }
 
   return (
@@ -55,8 +52,8 @@ export default function PagamentoPage() {
         <p className="tiny">Checkout</p>
         <h1>Ativar pacote Limpa e Protege</h1>
         <p className="muted">
-          Você está comprando proteção contínua. Depois do pagamento, o painel fica protegido
-          e a narrativa cobre arquivos, documentos e o site.
+          Preço único anual. Depois do pagamento, o painel fica protegido e a narrativa cobre
+          arquivos, documentos e o site.
         </p>
       </section>
       {symptoms.length ? (
@@ -72,27 +69,25 @@ export default function PagamentoPage() {
         <p className="muted">Nenhum sintoma marcado ainda. Você ainda pode ativar o pacote.</p>
       )}
 
-      <div className="plans">
-        {PLANS.map((item) => (
-          <button
-            key={item.id}
-            className={`card plan ${plan === item.id ? "selected" : ""}`}
-            type="button"
-            onClick={() => setPlan(item.id)}
-          >
-            <p className="tiny">{item.forWho}</p>
-            <h3>{item.name}</h3>
-            <p className="muted">{item.promise}</p>
-            <p className="price-note">Preço a definir</p>
-          </button>
-        ))}
-      </div>
+      <article className="card price-card">
+        <p className="tiny">Uso anual · pessoa física</p>
+        <h2>{ANNUAL.name}</h2>
+        <p className="price-big">{PRICE_LABEL}</p>
+        <p className="price-note">
+          ou {ANNUAL.installmentCount}x de {INSTALLMENT_LABEL}
+        </p>
+        <p className="muted">{ANNUAL.promise}</p>
+        <ul className="price-points">
+          <li>Um único valor para o ano.</li>
+          <li>Parcelamento em 12 vezes no cartão, quando a Stripe e o banco liberarem.</li>
+          <li>Pagamento processado pela Stripe.</li>
+        </ul>
+      </article>
 
       {error ? <p className="error">{error}</p> : null}
-      <p className="muted">Gateway de pagamento entra depois. Agora a ativação é de demonstração.</p>
       <div className="cta-row">
-        <button className="btn btn-blue" onClick={activate} disabled={loading} type="button">
-          {loading ? "Ativando..." : "Ativar pacote (demonstração)"}
+        <button className="btn btn-blue" onClick={pay} disabled={loading} type="button">
+          {loading ? "Abrindo Stripe..." : `Pagar ${PRICE_LABEL} no Stripe`}
         </button>
       </div>
     </main>
