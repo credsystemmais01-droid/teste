@@ -3,7 +3,6 @@ import { getUserId } from "@/lib/auth";
 import { db, ensureSchema } from "@/lib/db";
 import {
   getDefaultLogReadSeconds,
-  getDefaultPanelName,
   getDefaultRemoveDiagnosis,
   isAdminEmail,
   resolveLogReadSeconds,
@@ -40,10 +39,9 @@ export async function GET() {
     ORDER BY created_at DESC LIMIT 1
   `;
 
-  const defaultName = await getDefaultPanelName();
   const defaultDiagnosis = await getDefaultRemoveDiagnosis();
   const defaultLogReadSeconds = await getDefaultLogReadSeconds();
-  const panelName = resolvePanelName(user.panel_name, defaultName);
+  const panelName = resolvePanelName(user.panel_name);
   const removeDiagnosis = resolveRemoveDiagnosis(
     user.remove_diagnosis,
     user.remove_diagnosis_enabled,

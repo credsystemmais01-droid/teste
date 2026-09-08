@@ -308,7 +308,7 @@ export function PanelApp() {
       <div className="panel-top">
         <div>
           <p className="tiny">Painel ao vivo</p>
-          <h1>{me.user.panelName ? `Olá, ${me.user.panelName}` : "Olá"}</h1>
+          <h1>{me.user.panelName || "Olá"}</h1>
           <p className="muted">
             {me.user.panelName
               ? "Painel de proteção contínua."

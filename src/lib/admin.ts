@@ -47,10 +47,8 @@ export async function getDefaultRemoveDiagnosis() {
   return getSetting("default_remove_diagnosis");
 }
 
-export function resolvePanelName(userPanelName: unknown, defaultName: string) {
-  const chosen = String(userPanelName || "").trim();
-  if (chosen) return chosen;
-  return defaultName.trim();
+export function resolvePanelName(userPanelName: unknown) {
+  return String(userPanelName || "").trim();
 }
 
 export function clampLogSeconds(value: unknown, fallback = 8) {

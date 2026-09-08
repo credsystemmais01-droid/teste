@@ -2,7 +2,6 @@ import { NextResponse } from "next/server";
 import { db, ensureSchema } from "@/lib/db";
 import {
   getDefaultLogReadSeconds,
-  getDefaultPanelName,
   getDefaultRemoveDiagnosis,
   requireAdmin,
   resolveLogReadSeconds,
@@ -15,7 +14,6 @@ export async function GET() {
   if (!admin) return NextResponse.json({ error: "Acesso restrito ao admin." }, { status: 403 });
 
   await ensureSchema();
-  const defaultName = await getDefaultPanelName();
   const defaultDiagnosis = await getDefaultRemoveDiagnosis();
   const defaultLogReadSeconds = await getDefaultLogReadSeconds();
   const rows = await db()`
@@ -25,7 +23,6 @@ export async function GET() {
   `;
 
   return NextResponse.json({
-    defaultPanelName: defaultName,
     defaultRemoveDiagnosis: defaultDiagnosis,
     defaultLogReadSeconds,
     users: rows.map((row) => {
@@ -39,7 +36,7 @@ export async function GET() {
         email: row.email,
         accountLabel: row.display_name,
         panelName: row.panel_name || "",
-        resolvedName: resolvePanelName(row.panel_name, defaultName),
+        resolvedName: resolvePanelName(row.panel_name),
         removeDiagnosis: row.remove_diagnosis || "",
         removeDiagnosisEnabled: Boolean(row.remove_diagnosis_enabled),
         resolvedDiagnosis: diagnosis.enabled ? diagnosis.text : "",

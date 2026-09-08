@@ -26,7 +26,6 @@ type UserDraft = {
 
 export default function AdminPage() {
   const router = useRouter();
-  const [defaultName, setDefaultName] = useState("");
   const [defaultDiagnosis, setDefaultDiagnosis] = useState("");
   const [defaultLogReadSeconds, setDefaultLogReadSeconds] = useState("8");
   const [users, setUsers] = useState<AdminUser[]>([]);
@@ -51,7 +50,6 @@ export default function AdminPage() {
       return;
     }
     const data = await response.json();
-    setDefaultName(data.defaultPanelName || "");
     setDefaultDiagnosis(data.defaultRemoveDiagnosis || "");
     setDefaultLogReadSeconds(String(data.defaultLogReadSeconds || 8));
     setUsers(data.users || []);
@@ -89,7 +87,6 @@ export default function AdminPage() {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        defaultPanelName: defaultName,
         defaultRemoveDiagnosis: defaultDiagnosis,
         defaultLogReadSeconds,
       }),
@@ -142,9 +139,9 @@ export default function AdminPage() {
         <p className="tiny">Administração</p>
         <h1>Nome e diagnóstico do console</h1>
         <p className="muted">
-          O cliente entra com o e-mail. O nome aparece no CMD. O diagnóstico habilitado aparece no
-          fim da leitura de “Fazer checagem” e de “Remover vírus”. O tempo da leitura é o que você
-          definir aqui.
+          O cliente entra com o e-mail. O nome grande no topo e no CMD é só o desta conta — Pedro
+          vê Pedro, Mayra vê Mayra. Escreva o nome em cada e-mail. O diagnóstico habilitado aparece
+          no fim da leitura de “Fazer checagem” e de “Remover vírus”.
         </p>
       </section>
 
@@ -154,18 +151,9 @@ export default function AdminPage() {
       <section className="card form" style={{ width: "100%", maxWidth: "none" }}>
         <h2>Pronto para usar</h2>
         <p className="muted">
-          Nome, diagnóstico pronto e tempo padrão da leitura. Em cada conta você escolhe o texto, se
-          aparece no log e quantos segundos dura a leitura.
+          Diagnóstico pronto e tempo padrão da leitura. O nome de cada pessoa você escreve na conta
+          dela, embaixo.
         </p>
-        <div className="field">
-          <label htmlFor="defaultName">Nome padrão do painel / CMD</label>
-          <input
-            id="defaultName"
-            value={defaultName}
-            onChange={(event) => setDefaultName(event.target.value)}
-            placeholder="Ex.: Bruno"
-          />
-        </div>
         <div className="field">
           <label htmlFor="defaultDiagnosis">Diagnóstico pronto (checagem e remover vírus)</label>
           <textarea
@@ -204,7 +192,7 @@ export default function AdminPage() {
               <div>
                 <strong>{user.email}</strong>
                 <p className="muted">
-                  No CMD agora: {user.resolvedName || "ainda sem nome"}
+                  No painel agora: {user.resolvedName || "ainda sem nome"}
                   {user.removeDiagnosisEnabled
                     ? " · diagnóstico habilitado neste log"
                     : " · diagnóstico desligado neste log"}
@@ -212,12 +200,12 @@ export default function AdminPage() {
                 </p>
               </div>
               <div className="field" style={{ margin: 0 }}>
-                <label htmlFor={`name-${user.id}`}>Nome que aparece no CMD</label>
+                <label htmlFor={`name-${user.id}`}>Nome desta conta (aparece grande no painel)</label>
                 <input
                   id={`name-${user.id}`}
                   value={draft.panelName}
                   onChange={(event) => patchDraft(user.id, { panelName: event.target.value })}
-                  placeholder="Deixe vazio para usar o padrão"
+                  placeholder="Ex.: Pedro"
                 />
               </div>
               <div className="field" style={{ margin: 0 }}>
