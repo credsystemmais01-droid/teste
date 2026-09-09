@@ -29,9 +29,9 @@ export default async function BlogArticlePage({ params }: Props) {
   const others = POSTS.filter((item) => item.slug !== post.slug);
 
   return (
-    <main className="wrap">
+    <>
       <SiteNav extra="login" />
-
+      <main className="wrap">
       <article className="article">
         <p className="tiny">{post.category}</p>
         <h1>{post.title}</h1>
@@ -82,6 +82,7 @@ export default async function BlogArticlePage({ params }: Props) {
       </section>
 
       <SiteFooter />
-    </main>
+      </main>
+    </>
   );
 }

@@ -10,8 +10,9 @@ export const metadata = {
 
 export default function SuportePage() {
   return (
-    <main className="wrap">
+    <>
       <SiteNav extra="login" />
+      <main className="wrap">
       <article className="article">
         <p className="tiny">Atendimento ao cliente</p>
         <h1>Fale com a {COMPANY}</h1>
@@ -55,6 +56,7 @@ export default function SuportePage() {
         </p>
       </article>
       <SiteFooter />
-    </main>
+      </main>
+    </>
   );
 }

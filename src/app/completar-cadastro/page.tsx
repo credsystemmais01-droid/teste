@@ -75,8 +75,9 @@ function CompletarForm() {
   }
 
   return (
-    <main className="wrap">
+    <>
       <SiteNav extra="none" />
+      <main className="wrap">
       <form className="card form" onSubmit={onSubmit}>
         <p className="tiny">Quase lá</p>
         <h1>Completar dados</h1>
@@ -90,7 +91,8 @@ function CompletarForm() {
         </button>
       </form>
       <SiteFooter />
-    </main>
+      </main>
+    </>
   );
 }
 

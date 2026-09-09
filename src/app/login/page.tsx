@@ -70,12 +70,14 @@ function LoginForm() {
 
 export default function LoginPage() {
   return (
-    <main className="wrap">
+    <>
       <SiteNav extra="none" />
-      <Suspense>
-        <LoginForm />
-      </Suspense>
-      <SiteFooter />
-    </main>
+      <main className="wrap">
+        <Suspense>
+          <LoginForm />
+        </Suspense>
+        <SiteFooter />
+      </main>
+    </>
   );
 }

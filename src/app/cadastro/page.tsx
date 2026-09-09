@@ -94,12 +94,14 @@ function RegisterForm() {
 
 export default function RegisterPage() {
   return (
-    <main className="wrap">
+    <>
       <SiteNav extra="none" />
-      <Suspense>
-        <RegisterForm />
-      </Suspense>
-      <SiteFooter />
-    </main>
+      <main className="wrap">
+        <Suspense>
+          <RegisterForm />
+        </Suspense>
+        <SiteFooter />
+      </main>
+    </>
   );
 }

@@ -12,9 +12,9 @@ export const metadata: Metadata = {
 
 export default function BlogPage() {
   return (
-    <main className="wrap">
+    <>
       <SiteNav />
-
+      <main className="wrap">
       <section className="pay-hero">
         <p className="tiny">Sistema Guardião</p>
         <h1>Blog Limpa e Protege</h1>
@@ -43,6 +43,7 @@ export default function BlogPage() {
       </section>
 
       <SiteFooter />
-    </main>
+      </main>
+    </>
   );
 }

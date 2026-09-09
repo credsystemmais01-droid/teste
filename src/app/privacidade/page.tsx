@@ -10,8 +10,9 @@ export const metadata = {
 
 export default function PrivacidadePage() {
   return (
-    <main className="wrap">
+    <>
       <SiteNav extra="login" />
+      <main className="wrap">
       <article className="article">
         <p className="tiny">Política de Privacidade</p>
         <h1>Política de Privacidade da {COMPANY}</h1>
@@ -139,6 +140,7 @@ export default function PrivacidadePage() {
         </p>
       </article>
       <SiteFooter />
-    </main>
+      </main>
+    </>
   );
 }

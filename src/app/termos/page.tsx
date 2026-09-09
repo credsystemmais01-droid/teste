@@ -11,8 +11,9 @@ export const metadata = {
 
 export default function TermosPage() {
   return (
-    <main className="wrap">
+    <>
       <SiteNav extra="login" />
+      <main className="wrap">
       <article className="article">
         <p className="tiny">Termos de serviço</p>
         <h1>Termos de serviço da {COMPANY}</h1>
@@ -79,6 +80,7 @@ export default function TermosPage() {
         </p>
       </article>
       <SiteFooter />
-    </main>
+      </main>
+    </>
   );
 }

@@ -38,18 +38,21 @@ export default function PagamentoPage() {
   }
 
   return (
-    <main className="wrap">
+    <>
       <header className="site-header">
-        <Brand href="/painel" />
-        <div className="header-nav">
-          <Link className="btn btn-ghost" href="/blog">
-            Blog
-          </Link>
-          <Link className="btn btn-ghost" href="/painel">
-            Voltar ao painel
-          </Link>
+        <div className="header-inner">
+          <Brand href="/painel" />
+          <div className="header-nav">
+            <Link className="btn btn-ghost" href="/blog">
+              Blog
+            </Link>
+            <Link className="btn btn-ghost" href="/painel">
+              Voltar ao painel
+            </Link>
+          </div>
         </div>
       </header>
+      <main className="wrap">
       <section className="pay-hero">
         <p className="tiny">Checkout</p>
         <h1>Ativar pacote Guardian Proteção</h1>
@@ -76,6 +79,7 @@ export default function PagamentoPage() {
         <PriceCard wide action="pay" loading={loading} error={error} onPay={pay} />
       </section>
       <SiteFooter />
-    </main>
+      </main>
+    </>
   );
 }

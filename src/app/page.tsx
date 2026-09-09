@@ -8,9 +8,9 @@ import { POSTS } from "@/lib/blog";
 
 export default function HomePage() {
   return (
-    <main className="wrap">
+    <>
       <SiteNav />
-
+      <main className="wrap">
       <section className="hero">
         <div>
           <p className="tiny">Escudo contínuo</p>
@@ -83,6 +83,7 @@ export default function HomePage() {
       </section>
 
       <SiteFooter />
-    </main>
+      </main>
+    </>
   );
 }

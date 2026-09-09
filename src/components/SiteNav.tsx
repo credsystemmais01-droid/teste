@@ -9,22 +9,24 @@ type Props = {
 export function SiteNav({ brandHref = "/", extra = "login" }: Props) {
   return (
     <header className="site-header">
-      <Brand href={brandHref} />
-      <nav className="header-nav">
-        <Link className="btn btn-ghost" href="/blog">
-          Blog
-        </Link>
-        {extra === "login" ? (
-          <Link className="btn btn-ghost" href="/login">
-            Já tenho conta
+      <div className="header-inner">
+        <Brand href={brandHref} />
+        <nav className="header-nav">
+          <Link className="btn btn-ghost" href="/blog">
+            Blog
           </Link>
-        ) : null}
-        {extra === "panel" ? (
-          <Link className="btn btn-ghost" href="/painel">
-            Painel
-          </Link>
-        ) : null}
-      </nav>
+          {extra === "login" ? (
+            <Link className="btn btn-ghost" href="/login">
+              Já tenho conta
+            </Link>
+          ) : null}
+          {extra === "panel" ? (
+            <Link className="btn btn-ghost" href="/painel">
+              Painel
+            </Link>
+          ) : null}
+        </nav>
+      </div>
     </header>
   );
 }
