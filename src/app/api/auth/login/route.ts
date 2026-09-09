@@ -10,10 +10,19 @@ export async function POST(request: Request) {
 
   await ensureSchema();
   const rows = await db()`
-    SELECT id, password_hash FROM users WHERE email = ${email} LIMIT 1
+    SELECT id, password_hash, google_id FROM users WHERE email = ${email} LIMIT 1
   `;
   const user = rows[0];
-  if (!user || !(await bcrypt.compare(password, String(user.password_hash)))) {
+  if (!user) {
+    return NextResponse.json({ error: "E-mail ou senha inválidos." }, { status: 401 });
+  }
+  if (!user.password_hash) {
+    return NextResponse.json(
+      { error: "Esta conta entra com o Google." },
+      { status: 401 },
+    );
+  }
+  if (!(await bcrypt.compare(password, String(user.password_hash)))) {
     return NextResponse.json({ error: "E-mail ou senha inválidos." }, { status: 401 });
   }
 

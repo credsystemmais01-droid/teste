@@ -17,7 +17,7 @@ export async function PATCH(request: Request) {
     const seconds = Number(body.defaultLogReadSeconds);
     await upsertSetting(
       "default_log_read_seconds",
-      String(Number.isFinite(seconds) && seconds > 0 ? Math.min(180, Math.max(2, Math.round(seconds))) : 8),
+      String(Number.isFinite(seconds) && seconds > 0 ? Math.min(300, Math.max(2, Math.round(seconds))) : 8),
     );
   }
 

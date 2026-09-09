@@ -4,13 +4,15 @@ import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Brand } from "@/components/Brand";
+import { Copyright } from "@/components/Copyright";
 import { SYMPTOMS } from "@/lib/symptoms";
 
 type View = "hub" | "enter" | "check" | "virus" | "remove" | "protect" | "safe";
 type Status = "disconnected" | "scanned" | "threat" | "protected";
 
 type Me = {
-  user: { panelName: string; email: string };
+  user: { panelName: string; email: string; authProvider?: string };
+  profileComplete?: boolean;
   isAdmin?: boolean;
   machine: { name: string; status: Status } | null;
   symptoms: string[];
@@ -117,6 +119,10 @@ export function PanelApp() {
       return;
     }
     const data = (await response.json()) as Me;
+    if (data.user.authProvider === "google" && data.profileComplete === false) {
+      router.push("/completar-cadastro");
+      return;
+    }
     setMe(data);
     if (data.machine?.name) setMachineName(data.machine.name);
     if (data.symptoms?.length) setDiagnosed(data.symptoms);
@@ -176,8 +182,9 @@ export function PanelApp() {
       onDone();
       return;
     }
-    const seconds = Math.min(180, Math.max(1, Number(durationSeconds) || 3));
-    const delay = Math.max(35, Math.min(70, Math.round((seconds * 1000) / script.length)));
+    const seconds = Math.min(300, Math.max(2, Number(durationSeconds) || 8));
+    const remaining = script.length - 1;
+    const delay = Math.max(20, Math.round((seconds * 1000) / remaining));
     let index = 1;
     playTimer.current = setInterval(() => {
       setLines((current) => [...current, script[index]].slice(-8));
@@ -229,28 +236,36 @@ export function PanelApp() {
     return script;
   }
 
-  function startRemove() {
-    setView("remove");
-    setRemoveDone(false);
-    const name = me?.user.panelName || "conta";
+  async function startTimedLog(kind: "remove" | "check") {
+    if (kind === "remove") {
+      setView("remove");
+      setRemoveDone(false);
+    } else {
+      setView("check");
+      setCheckDone(false);
+    }
+    stopConsole();
+    setRunning(true);
+    setLines(["> iniciando leitura do log..."]);
+    const fresh = (await refreshMe()) || me;
+    const name = fresh?.user.panelName || me?.user.panelName || "conta";
+    const base = kind === "remove" ? REMOVE_LOG_LINES(name) : CHECK_LOG_LINES(name);
     playLines(
-      buildDiagnosisScript(name, me, REMOVE_LOG_LINES(name)),
-      () => setRemoveDone(true),
-      me?.logReadSeconds,
+      buildDiagnosisScript(name, fresh, base),
+      () => {
+        if (kind === "remove") setRemoveDone(true);
+        else setCheckDone(true);
+      },
+      fresh?.logReadSeconds ?? me?.logReadSeconds,
     );
-    void refreshMe();
+  }
+
+  function startRemove() {
+    void startTimedLog("remove");
   }
 
   function startCheck() {
-    setView("check");
-    setCheckDone(false);
-    const name = me?.user.panelName || "conta";
-    playLines(
-      buildDiagnosisScript(name, me, CHECK_LOG_LINES(name)),
-      () => setCheckDone(true),
-      me?.logReadSeconds,
-    );
-    void refreshMe();
+    void startTimedLog("check");
   }
 
   async function diagnose() {
@@ -505,9 +520,9 @@ export function PanelApp() {
         </section>
       ) : null}
 
-      <footer className="site-footer">
-        <span className="muted">Limpa e Protege</span>
+      <footer className="site-footer site-footer-simple">
         <span className="muted">{footer}</span>
+        <Copyright />
       </footer>
     </main>
   );

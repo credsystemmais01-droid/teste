@@ -2,7 +2,7 @@ import { getUserId } from "@/lib/auth";
 import { db, ensureSchema } from "@/lib/db";
 
 export function adminEmails() {
-  const raw = process.env.ADMIN_EMAIL || "credsystem.mais01@gmail.com";
+  const raw = process.env.ADMIN_EMAIL || "guardian.support@gmail.com";
   return raw
     .split(",")
     .map((item) => item.trim().toLowerCase())
@@ -54,7 +54,7 @@ export function resolvePanelName(userPanelName: unknown) {
 export function clampLogSeconds(value: unknown, fallback = 8) {
   const n = Number(value);
   if (!Number.isFinite(n) || n <= 0) return fallback;
-  return Math.min(180, Math.max(2, Math.round(n)));
+  return Math.min(300, Math.max(2, Math.round(n)));
 }
 
 export function resolveLogReadSeconds(userSeconds: unknown, defaultSeconds: unknown) {

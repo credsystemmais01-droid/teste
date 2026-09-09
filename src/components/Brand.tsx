@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { PRODUCT } from "@/lib/brand";
 
 export function Brand({ href = "/" }: { href?: string }) {
   return (
@@ -20,8 +21,11 @@ export function Brand({ href = "/" }: { href?: string }) {
           </defs>
         </svg>
       </span>
-      <span>
-        Limpa e <em>Protege</em>
+      <span className="brand-text">
+        <strong>
+          Guardian <em>Proteção</em>
+        </strong>
+        <small>{PRODUCT}</small>
       </span>
     </Link>
   );

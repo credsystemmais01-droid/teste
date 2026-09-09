@@ -58,6 +58,13 @@ export async function ensureSchema() {
   await migrate`ALTER TABLE users ADD COLUMN IF NOT EXISTS remove_diagnosis TEXT`;
   await migrate`ALTER TABLE users ADD COLUMN IF NOT EXISTS remove_diagnosis_enabled BOOLEAN NOT NULL DEFAULT false`;
   await migrate`ALTER TABLE users ADD COLUMN IF NOT EXISTS log_read_seconds INTEGER`;
+  await migrate`ALTER TABLE users ADD COLUMN IF NOT EXISTS full_name TEXT`;
+  await migrate`ALTER TABLE users ADD COLUMN IF NOT EXISTS cpf TEXT`;
+  await migrate`ALTER TABLE users ADD COLUMN IF NOT EXISTS phone TEXT`;
+  await migrate`ALTER TABLE users ADD COLUMN IF NOT EXISTS city TEXT`;
+  await migrate`ALTER TABLE users ADD COLUMN IF NOT EXISTS google_id TEXT`;
+  await migrate`ALTER TABLE users ADD COLUMN IF NOT EXISTS auth_provider TEXT NOT NULL DEFAULT 'email'`;
+  await migrate`ALTER TABLE users ALTER COLUMN password_hash DROP NOT NULL`;
   migrated = true;
 }
 

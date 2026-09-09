@@ -19,8 +19,11 @@ export async function POST() {
   }
 
   await ensureSchema();
-  const users = await db()`SELECT email FROM users WHERE id = ${userId} LIMIT 1`;
+  const users = await db()`
+    SELECT email, full_name, cpf, phone FROM users WHERE id = ${userId} LIMIT 1
+  `;
   const email = users[0] ? String(users[0].email) : undefined;
+  const fullName = users[0]?.full_name ? String(users[0].full_name) : undefined;
   const origin = siteUrl();
 
   try {
@@ -29,7 +32,12 @@ export async function POST() {
       locale: "pt-BR",
       customer_email: email,
       client_reference_id: userId,
-      metadata: { userId, plan: ANNUAL.id },
+      metadata: {
+        userId,
+        plan: ANNUAL.id,
+        fullName: fullName || "",
+        cpf: users[0]?.cpf ? String(users[0].cpf) : "",
+      },
       line_items: [
         {
           quantity: 1,
@@ -38,7 +46,7 @@ export async function POST() {
             unit_amount: ANNUAL.amountCents,
             product_data: {
               name: ANNUAL.name,
-              description: `${ANNUAL.promise} Parcelado em ${ANNUAL.installmentCount} vezes de ${INSTALLMENT_LABEL}.`,
+              description: `${ANNUAL.promise} Inclui painel 24h, dados, empresa, site, destrava acessos, drivers e softwares. ${ANNUAL.installmentCount}x de ${INSTALLMENT_LABEL}.`,
             },
           },
         },
@@ -61,7 +69,12 @@ export async function POST() {
         locale: "pt-BR",
         customer_email: email,
         client_reference_id: userId,
-        metadata: { userId, plan: ANNUAL.id },
+        metadata: {
+        userId,
+        plan: ANNUAL.id,
+        fullName: fullName || "",
+        cpf: users[0]?.cpf ? String(users[0].cpf) : "",
+      },
         line_items: [
           {
             quantity: 1,

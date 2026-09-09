@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Brand } from "@/components/Brand";
+import { Copyright } from "@/components/Copyright";
 
 type AdminUser = {
   id: string;
@@ -23,6 +24,62 @@ type UserDraft = {
   removeDiagnosisEnabled: boolean;
   logReadSeconds: string;
 };
+
+const TIME_PRESETS = [5, 8, 15, 30, 60, 120, 180];
+
+function formatSeconds(value: string | number) {
+  const n = Number(value);
+  if (!Number.isFinite(n) || n <= 0) return "";
+  if (n < 60) return `${n} segundos`;
+  const min = Math.floor(n / 60);
+  const sec = n % 60;
+  return sec ? `${min} min ${sec} s` : `${min} minuto${min > 1 ? "s" : ""}`;
+}
+
+function TimePicker({
+  id,
+  value,
+  onChange,
+  emptyHint,
+}: {
+  id: string;
+  value: string;
+  onChange: (next: string) => void;
+  emptyHint?: string;
+}) {
+  const preview = value ? formatSeconds(value) : emptyHint;
+  return (
+    <div className="field" style={{ margin: 0 }}>
+      <label htmlFor={id}>1. Tempo da leitura no CMD</label>
+      <p className="admin-help">
+        É o tempo que o console fica passando os nomes dos arquivos. Quando esse tempo acaba, a
+        mensagem final aparece.
+      </p>
+      <input
+        id={id}
+        type="number"
+        min={2}
+        max={300}
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+        placeholder={emptyHint || "Segundos"}
+      />
+      <div className="time-presets">
+        {TIME_PRESETS.map((seconds) => (
+          <button
+            key={seconds}
+            className={`btn btn-ghost time-chip${value === String(seconds) ? " selected" : ""}`}
+            type="button"
+            onClick={() => onChange(String(seconds))}
+          >
+            {seconds}s
+          </button>
+        ))}
+      </div>
+      {preview ? <p className="muted">Neste CMD: {preview} de leitura, depois a mensagem.</p> : null}
+    </div>
+  );
+}
 
 export default function AdminPage() {
   const router = useRouter();
@@ -61,9 +118,10 @@ export default function AdminPage() {
             panelName: user.panelName,
             removeDiagnosis: user.removeDiagnosis,
             removeDiagnosisEnabled: user.removeDiagnosisEnabled,
-            logReadSeconds: user.logReadSeconds === "" || user.logReadSeconds == null
-              ? ""
-              : String(user.logReadSeconds),
+            logReadSeconds:
+              user.logReadSeconds === "" || user.logReadSeconds == null
+                ? ""
+                : String(user.logReadSeconds),
           },
         ]),
       ),
@@ -95,7 +153,7 @@ export default function AdminPage() {
       setError("Não foi possível salvar os padrões.");
       return;
     }
-    setSaved("Padrões salvos.");
+    setSaved("Padrão salvo. Vale para contas sem tempo ou mensagem próprios.");
     await load();
   }
 
@@ -117,7 +175,7 @@ export default function AdminPage() {
       setError("Não foi possível salvar esta conta.");
       return;
     }
-    setSaved("Conta salva. O cliente vê isso no próximo clique do painel.");
+    setSaved("Conta salva. No próximo clique de checagem ou remover vírus o cliente já vê o tempo e a mensagem novos.");
     await load();
   }
 
@@ -137,25 +195,32 @@ export default function AdminPage() {
 
       <section className="pay-hero">
         <p className="tiny">Administração</p>
-        <h1>Nome e diagnóstico do console</h1>
+        <h1>Tempo do CMD e mensagem final</h1>
         <p className="muted">
-          O cliente entra com o e-mail. O nome grande no topo e no CMD é só o desta conta — Pedro
-          vê Pedro, Mayra vê Mayra. Escreva o nome em cada e-mail. O diagnóstico habilitado aparece
-          no fim da leitura de “Fazer checagem” e de “Remover vírus”.
+          Você define duas coisas: quanto tempo o console fica lendo, e qual texto aparece quando
+          essa leitura acaba. O cliente vê isso em “Fazer checagem” e em “Remover vírus”.
         </p>
       </section>
 
       {error ? <p className="error">{error}</p> : null}
       {saved ? <p className="muted">{saved}</p> : null}
 
-      <section className="card form" style={{ width: "100%", maxWidth: "none" }}>
-        <h2>Pronto para usar</h2>
+      <section className="card form admin-defaults">
+        <h2>Padrão para todo mundo</h2>
         <p className="muted">
-          Diagnóstico pronto e tempo padrão da leitura. O nome de cada pessoa você escreve na conta
-          dela, embaixo.
+          Se a conta não tiver tempo ou mensagem próprios, usa o que está aqui.
         </p>
+        <TimePicker
+          id="defaultLogReadSeconds"
+          value={defaultLogReadSeconds}
+          onChange={setDefaultLogReadSeconds}
+        />
         <div className="field">
-          <label htmlFor="defaultDiagnosis">Diagnóstico pronto (checagem e remover vírus)</label>
+          <label htmlFor="defaultDiagnosis">2. Mensagem final (aparece depois do tempo)</label>
+          <p className="admin-help">
+            Este texto entra no CMD no fim da leitura, em rosa. Também aparece no card abaixo do
+            console.
+          </p>
           <textarea
             id="defaultDiagnosis"
             value={defaultDiagnosis}
@@ -163,19 +228,12 @@ export default function AdminPage() {
             placeholder="Ex.: Trojan em pasta temporária. Sessão suspeita na porta 445. Recomendado isolar e ativar o pacote."
           />
         </div>
-        <div className="field">
-          <label htmlFor="defaultLogReadSeconds">Tempo padrão da leitura do log (segundos)</label>
-          <input
-            id="defaultLogReadSeconds"
-            type="number"
-            min={2}
-            max={180}
-            value={defaultLogReadSeconds}
-            onChange={(event) => setDefaultLogReadSeconds(event.target.value)}
-          />
-        </div>
+        <p className="muted">
+          Resumo: o CMD lê por {formatSeconds(defaultLogReadSeconds) || "—"} e depois mostra a
+          mensagem padrão.
+        </p>
         <button className="btn btn-blue" type="button" onClick={saveDefaults}>
-          Salvar padrões
+          Salvar padrão
         </button>
       </section>
 
@@ -187,20 +245,22 @@ export default function AdminPage() {
             removeDiagnosisEnabled: false,
             logReadSeconds: "",
           };
+          const usedSeconds = draft.logReadSeconds || defaultLogReadSeconds;
+          const usedMessage = (draft.removeDiagnosis || defaultDiagnosis).trim();
           return (
             <article className="card admin-account" key={user.id}>
               <div>
                 <strong>{user.email}</strong>
                 <p className="muted">
-                  No painel agora: {user.resolvedName || "ainda sem nome"}
+                  Nome no painel: {user.resolvedName || "ainda sem nome"}
+                  {` · CMD: ${formatSeconds(user.resolvedLogReadSeconds)}`}
                   {user.removeDiagnosisEnabled
-                    ? " · diagnóstico habilitado neste log"
-                    : " · diagnóstico desligado neste log"}
-                  {` · leitura em ${user.resolvedLogReadSeconds}s`}
+                    ? " · mensagem ligada"
+                    : " · mensagem desligada (só o log, sem o texto final)"}
                 </p>
               </div>
               <div className="field" style={{ margin: 0 }}>
-                <label htmlFor={`name-${user.id}`}>Nome desta conta (aparece grande no painel)</label>
+                <label htmlFor={`name-${user.id}`}>Nome desta conta (grande no painel e no CMD)</label>
                 <input
                   id={`name-${user.id}`}
                   value={draft.panelName}
@@ -208,15 +268,22 @@ export default function AdminPage() {
                   placeholder="Ex.: Pedro"
                 />
               </div>
+              <TimePicker
+                id={`time-${user.id}`}
+                value={draft.logReadSeconds}
+                onChange={(next) => patchDraft(user.id, { logReadSeconds: next })}
+                emptyHint={`Usa o padrão: ${formatSeconds(defaultLogReadSeconds)}`}
+              />
               <div className="field" style={{ margin: 0 }}>
-                <label htmlFor={`diag-${user.id}`}>Diagnóstico no fim da checagem e do remover vírus</label>
+                <label htmlFor={`diag-${user.id}`}>2. Mensagem final desta conta</label>
+                <p className="admin-help">
+                  Vazio = usa a mensagem padrão. Só aparece se o interruptor abaixo estiver ligado.
+                </p>
                 <textarea
                   id={`diag-${user.id}`}
                   value={draft.removeDiagnosis}
-                  onChange={(event) =>
-                    patchDraft(user.id, { removeDiagnosis: event.target.value })
-                  }
-                  placeholder="Deixe vazio para usar o diagnóstico pronto. Só aparece se estiver habilitado."
+                  onChange={(event) => patchDraft(user.id, { removeDiagnosis: event.target.value })}
+                  placeholder={defaultDiagnosis || "Escreva a mensagem que o cliente lê no fim do CMD."}
                 />
               </div>
               <label className="admin-toggle">
@@ -227,20 +294,13 @@ export default function AdminPage() {
                     patchDraft(user.id, { removeDiagnosisEnabled: event.target.checked })
                   }
                 />
-                Mostrar este diagnóstico no log desta conta
+                Ligar a mensagem final no CMD desta conta
               </label>
-              <div className="field" style={{ margin: 0 }}>
-                <label htmlFor={`time-${user.id}`}>Tempo da leitura do log (segundos)</label>
-                <input
-                  id={`time-${user.id}`}
-                  type="number"
-                  min={2}
-                  max={180}
-                  value={draft.logReadSeconds}
-                  onChange={(event) => patchDraft(user.id, { logReadSeconds: event.target.value })}
-                  placeholder={`Padrão: ${defaultLogReadSeconds}s`}
-                />
-              </div>
+              <p className="muted">
+                {draft.removeDiagnosisEnabled
+                  ? `Este cliente: o CMD lê ${formatSeconds(usedSeconds)} e depois mostra “${usedMessage.slice(0, 80) || "…"}${usedMessage.length > 80 ? "…" : ""}”.`
+                  : "Este cliente: o CMD lê os logs e termina sem a sua mensagem, porque o interruptor está desligado."}
+              </p>
               <button className="btn btn-purple" type="button" onClick={() => saveUser(user.id)}>
                 Salvar esta conta
               </button>
@@ -248,6 +308,7 @@ export default function AdminPage() {
           );
         })}
       </section>
+      <Copyright />
     </main>
   );
 }

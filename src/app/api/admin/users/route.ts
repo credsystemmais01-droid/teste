@@ -61,7 +61,7 @@ export async function PATCH(request: Request) {
   const parsedSeconds = Number(rawSeconds);
   const logReadSeconds =
     rawSeconds && Number.isFinite(parsedSeconds) && parsedSeconds > 0
-      ? Math.min(180, Math.max(2, Math.round(parsedSeconds)))
+      ? Math.min(300, Math.max(2, Math.round(parsedSeconds)))
       : null;
   if (!userId) {
     return NextResponse.json({ error: "Usuário inválido." }, { status: 400 });

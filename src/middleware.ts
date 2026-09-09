@@ -6,7 +6,12 @@ export async function middleware(request: NextRequest) {
   const token = request.cookies.get("lp_session")?.value;
   const secret = process.env.SESSION_SECRET;
   if (!token || !secret) {
-    return NextResponse.redirect(new URL("/login", request.url));
+    const path = request.nextUrl.pathname;
+    const target =
+      path === "/pagamento" || path.startsWith("/pagamento/")
+        ? "/cadastro?next=/pagamento"
+        : "/login";
+    return NextResponse.redirect(new URL(target, request.url));
   }
   try {
     await jwtVerify(token, new TextEncoder().encode(secret));
@@ -17,5 +22,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/painel/:path*", "/pagamento", "/admin/:path*"],
+  matcher: ["/painel/:path*", "/pagamento", "/admin/:path*", "/completar-cadastro"],
 };

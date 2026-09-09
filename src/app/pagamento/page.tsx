@@ -3,7 +3,9 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Brand } from "@/components/Brand";
-import { ANNUAL, INSTALLMENT_LABEL, PRICE_LABEL } from "@/lib/pricing";
+import { PackageInfo } from "@/components/PackageInfo";
+import { PriceCard } from "@/components/PriceCard";
+import { SiteFooter } from "@/components/SiteFooter";
 
 export default function PagamentoPage() {
   const [symptoms, setSymptoms] = useState<string[]>([]);
@@ -50,14 +52,13 @@ export default function PagamentoPage() {
       </header>
       <section className="pay-hero">
         <p className="tiny">Checkout</p>
-        <h1>Ativar pacote Limpa e Protege</h1>
+        <h1>Ativar pacote Guardian Proteção</h1>
         <p className="muted">
-          Preço único anual. Depois do pagamento, o painel fica protegido e a narrativa cobre
-          arquivos, documentos e o site.
+          Leia o que entra no anual. O valor aparece por último, antes de pagar na Stripe.
         </p>
       </section>
       {symptoms.length ? (
-        <section className="card pillar" style={{ margin: "16px 0" }}>
+        <section className="card pillar" style={{ margin: "16px 0 28px" }}>
           <h3>Sintomas que você marcou</h3>
           <ul>
             {symptoms.map((item) => (
@@ -69,27 +70,12 @@ export default function PagamentoPage() {
         <p className="muted">Nenhum sintoma marcado ainda. Você ainda pode ativar o pacote.</p>
       )}
 
-      <article className="card price-card">
-        <p className="tiny">Uso anual · pessoa física</p>
-        <h2>{ANNUAL.name}</h2>
-        <p className="price-big">{PRICE_LABEL}</p>
-        <p className="price-note">
-          ou {ANNUAL.installmentCount}x de {INSTALLMENT_LABEL}
-        </p>
-        <p className="muted">{ANNUAL.promise}</p>
-        <ul className="price-points">
-          <li>Um único valor para o ano.</li>
-          <li>Parcelamento em 12 vezes no cartão, quando a Stripe e o banco liberarem.</li>
-          <li>Pagamento processado pela Stripe.</li>
-        </ul>
-      </article>
+      <PackageInfo />
 
-      {error ? <p className="error">{error}</p> : null}
-      <div className="cta-row">
-        <button className="btn btn-blue" onClick={pay} disabled={loading} type="button">
-          {loading ? "Abrindo Stripe..." : `Pagar ${PRICE_LABEL} no Stripe`}
-        </button>
-      </div>
+      <section className="price-home">
+        <PriceCard wide action="pay" loading={loading} error={error} onPay={pay} />
+      </section>
+      <SiteFooter />
     </main>
   );
 }

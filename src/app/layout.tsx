@@ -8,8 +8,8 @@ const geist = Geist({
 });
 
 export const metadata: Metadata = {
-  title: "Limpa e Protege",
-  description: "Seu computador 24 horas. Sem parar.",
+  title: "Guardian Proteção",
+  description: "Guardian Proteção. Seu computador 24 horas. Sem parar.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

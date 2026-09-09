@@ -9,6 +9,7 @@ import {
   resolvePanelName,
   resolveRemoveDiagnosis,
 } from "@/lib/admin";
+import { isProfileComplete } from "@/lib/profile";
 
 export async function GET() {
   const userId = await getUserId();
@@ -17,7 +18,8 @@ export async function GET() {
   await ensureSchema();
   const sql = db();
   const users = await sql`
-    SELECT id, email, panel_name, remove_diagnosis, remove_diagnosis_enabled, log_read_seconds
+    SELECT id, email, panel_name, remove_diagnosis, remove_diagnosis_enabled, log_read_seconds,
+           full_name, cpf, phone, auth_provider
     FROM users WHERE id = ${userId} LIMIT 1
   `;
   const user = users[0];
@@ -53,7 +55,10 @@ export async function GET() {
       id: user.id,
       email: user.email,
       panelName,
+      fullName: user.full_name || "",
+      authProvider: user.auth_provider || "email",
     },
+    profileComplete: isProfileComplete(user),
     removeDiagnosis,
     logReadSeconds: resolveLogReadSeconds(user.log_read_seconds, defaultLogReadSeconds),
     isAdmin: isAdminEmail(String(user.email)),

@@ -2,8 +2,9 @@ import Link from "next/link";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
 import { ShieldVisual } from "@/components/ShieldVisual";
+import { PackageInfo } from "@/components/PackageInfo";
+import { PriceCard } from "@/components/PriceCard";
 import { POSTS } from "@/lib/blog";
-import { ANNUAL, INSTALLMENT_LABEL, PRICE_LABEL } from "@/lib/pricing";
 
 export default function HomePage() {
   return (
@@ -38,55 +39,19 @@ export default function HomePage() {
               <span className="muted">sem pausa</span>
             </div>
             <div className="stat">
-              <b>3</b>
-              <span className="muted">camadas de narrativa</span>
+              <b>12</b>
+              <span className="muted">meses no anual</span>
             </div>
             <div className="stat">
-              <b>Neon</b>
-              <span className="muted">painel ao vivo</span>
+              <b>Stripe</b>
+              <span className="muted">pagamento seguro</span>
             </div>
           </div>
         </div>
         <ShieldVisual />
       </section>
 
-      <section className="pillars">
-        <article className="card pillar">
-          <div className="ico">▣</div>
-          <h3>Dados, fotos e documentos</h3>
-          <p>Protege seus dados, fotos e documentos.</p>
-        </article>
-        <article className="card pillar">
-          <div className="ico">◈</div>
-          <h3>Sua empresa</h3>
-          <p>Protege sua empresa.</p>
-        </article>
-        <article className="card pillar">
-          <div className="ico">◎</div>
-          <h3>Site e rede</h3>
-          <p>Protege seu site de ataques, hackers, malwares e trojans.</p>
-        </article>
-      </section>
-
-      <section className="price-home">
-        <article className="card price-card">
-          <p className="tiny">Preço único · uso anual</p>
-          <h2>Limpa e Protege Anual</h2>
-          <p className="price-big">{PRICE_LABEL}</p>
-          <p className="price-note">
-            ou {ANNUAL.installmentCount}x de {INSTALLMENT_LABEL}
-          </p>
-          <p className="muted">{ANNUAL.promise}</p>
-          <div className="cta-row">
-            <Link className="btn btn-blue" href="/cadastro">
-              Assinar agora
-            </Link>
-            <Link className="btn btn-ghost" href="/pagamento">
-              Ir ao checkout
-            </Link>
-          </div>
-        </article>
-      </section>
+      <PackageInfo />
 
       <section className="blog-home">
         <div className="pay-hero">
@@ -111,6 +76,10 @@ export default function HomePage() {
             </article>
           ))}
         </div>
+      </section>
+
+      <section className="price-home">
+        <PriceCard />
       </section>
 
       <SiteFooter />
