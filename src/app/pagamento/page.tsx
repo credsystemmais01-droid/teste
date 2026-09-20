@@ -9,6 +9,7 @@ import { SiteFooter } from "@/components/SiteFooter";
 
 export default function PagamentoPage() {
   const [symptoms, setSymptoms] = useState<string[]>([]);
+  const [paid, setPaid] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -17,6 +18,7 @@ export default function PagamentoPage() {
       .then((response) => (response.ok ? response.json() : null))
       .then((data) => {
         if (data?.symptoms) setSymptoms(data.symptoms);
+        if (data?.subscription) setPaid(true);
       });
   }, []);
 
@@ -55,12 +57,26 @@ export default function PagamentoPage() {
       <main className="wrap">
       <section className="pay-hero">
         <p className="tiny">Checkout</p>
-        <h1>Ativar pacote Guardian Proteção</h1>
+        <h1>Ativar o acesso vitalício Guardian</h1>
         <p className="muted">
-          Leia o que entra no anual. O valor aparece por último, antes de pagar na Stripe.
+          Leia o que entra no acesso vitalício. É uma compra única, de valor fixo, sem
+          mensalidade e sem renovação — o valor aparece por último, antes de pagar na Stripe.
         </p>
       </section>
-      {symptoms.length ? (
+
+      {paid ? (
+        <section className="success-card">
+          <h2>Esta conta já tem o acesso vitalício.</h2>
+          <p>
+            A compra é única e já está registrada: computador e notebook seguem protegidos 24
+            horas, para sempre. Não existe segunda cobrança, mensalidade nem renovação.
+          </p>
+          <Link className="btn btn-blue" href="/painel">
+            Voltar ao painel protegido
+          </Link>
+        </section>
+      ) : null}
+      {!paid && symptoms.length ? (
         <section className="card pillar" style={{ margin: "16px 0 28px" }}>
           <h3>Sintomas que você marcou</h3>
           <ul>
@@ -69,15 +85,18 @@ export default function PagamentoPage() {
             ))}
           </ul>
         </section>
-      ) : (
+      ) : !paid ? (
         <p className="muted">Nenhum sintoma marcado ainda. Você ainda pode ativar o pacote.</p>
-      )}
+      ) : null}
 
-      <PackageInfo />
-
-      <section className="price-home">
-        <PriceCard wide action="pay" loading={loading} error={error} onPay={pay} />
-      </section>
+      {!paid ? (
+        <>
+          <PackageInfo />
+          <section className="price-home">
+            <PriceCard wide action="pay" loading={loading} error={error} onPay={pay} />
+          </section>
+        </>
+      ) : null}
       <SiteFooter />
       </main>
     </>

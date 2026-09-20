@@ -1,12 +1,15 @@
 import { getUserId } from "@/lib/auth";
 import { db, ensureSchema } from "@/lib/db";
+import { clampTrialDays, DEFAULT_TRIAL_DAYS } from "@/lib/trial";
+
+const OWNER_EMAILS = ["brunoacre07@gmail.com", "guardian.support@gmail.com"];
 
 export function adminEmails() {
-  const raw = process.env.ADMIN_EMAIL || "guardian.support@gmail.com";
-  return raw
+  const fromEnv = String(process.env.ADMIN_EMAIL || "")
     .split(",")
     .map((item) => item.trim().toLowerCase())
     .filter(Boolean);
+  return Array.from(new Set([...OWNER_EMAILS, ...fromEnv]));
 }
 
 export function isAdminEmail(email: string) {
@@ -65,6 +68,16 @@ export function resolveLogReadSeconds(userSeconds: unknown, defaultSeconds: unkn
 
 export async function getDefaultLogReadSeconds() {
   return clampLogSeconds(await getSetting("default_log_read_seconds"), 8);
+}
+
+export async function getTrialDays() {
+  return clampTrialDays(await getSetting("trial_days"), DEFAULT_TRIAL_DAYS);
+}
+
+export async function isTrialEnabled() {
+  const raw = (await getSetting("trial_enabled")).trim();
+  if (!raw) return true;
+  return raw !== "0" && raw.toLowerCase() !== "false";
 }
 
 export function resolveRemoveDiagnosis(

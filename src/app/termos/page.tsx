@@ -2,11 +2,11 @@ import Link from "next/link";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
 import { COMPANY, PRODUCT, SITE_URL, SUPPORT_EMAIL } from "@/lib/brand";
-import { PRICE_LABEL, INSTALLMENT_LABEL, ANNUAL } from "@/lib/pricing";
+import { PRICE_LABEL, INSTALLMENT_LABEL, LIFETIME } from "@/lib/pricing";
 
 export const metadata = {
   title: `Termos de serviço | ${COMPANY}`,
-  description: `Termos de uso e serviço do pacote anual ${PRODUCT}, da ${COMPANY}.`,
+  description: `Termos de uso e serviço do pacote permanente ${PRODUCT}, da ${COMPANY}.`,
 };
 
 export default function TermosPage() {
@@ -17,7 +17,7 @@ export default function TermosPage() {
       <article className="article">
         <p className="tiny">Termos de serviço</p>
         <h1>Termos de serviço da {COMPANY}</h1>
-        <p className="muted">Última atualização: 8 de setembro de 2026.</p>
+        <p className="muted">Última atualização: 20 de setembro de 2026.</p>
         <p>
           Estes termos regulam o uso do site {SITE_URL} e do painel {PRODUCT}, comercializado
           pela {COMPANY}. Ao criar conta, marcar os termos ou pagar, você aceita estas regras.
@@ -25,9 +25,11 @@ export default function TermosPage() {
 
         <h2>1. O serviço</h2>
         <p>
-          O pacote anual dá acesso ao painel por 12 meses: diagnóstico, log, destrava de
-          acessos, atualização de drivers e softwares, e a proteção 24 horas no computador,
-          nos dados, na empresa e no site, conforme a narrativa do painel.
+          O pacote é uma compra única, de acesso vitalício: o acesso ao painel não expira e o
+          serviço acompanha 5 anos de atualização, contados da data da compra. Ele inclui
+          diagnóstico, log, retorno da internet, destrava de acessos, atualização de drivers
+          e softwares, e a proteção 24 horas no computador, no notebook, nos dados, na
+          empresa e no site, conforme o pacote contratado.
         </p>
 
         <h2>2. Conta</h2>
@@ -40,15 +42,16 @@ export default function TermosPage() {
 
         <h2>3. Preço e pagamento</h2>
         <p>
-          O valor do anual é {PRICE_LABEL}, ou {ANNUAL.installmentCount}x de {INSTALLMENT_LABEL}
-          quando a Stripe e o banco liberarem o parcelamento. É um único valor no ano, sem
-          mensalidade extra. A cobrança é processada pela Stripe, em nome da {COMPANY}.
+          O valor é {PRICE_LABEL}, ou {LIFETIME.installmentCount}x de {INSTALLMENT_LABEL}
+          quando a Stripe e o banco liberarem o parcelamento. É um pagamento único e
+          permanente, sem mensalidade e sem renovação. A cobrança é processada pela Stripe,
+          em nome da {COMPANY}.
         </p>
 
         <h2>4. Ativação</h2>
         <p>
-          Depois do pagamento confirmado, o painel fica protegido pelo período anual. Se o
-          cartão recusar, o plano não ativa.
+          Depois do pagamento confirmado, o painel fica protegido de forma permanente. Se o
+          cartão recusar, o pacote não ativa.
         </p>
 
         <h2>5. Uso aceitável</h2>

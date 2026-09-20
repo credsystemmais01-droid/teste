@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getUserId } from "@/lib/auth";
 import { db, ensureSchema } from "@/lib/db";
-import { ANNUAL, INSTALLMENT_LABEL } from "@/lib/pricing";
+import { LIFETIME, INSTALLMENT_LABEL } from "@/lib/pricing";
 import { getStripe, siteUrl } from "@/lib/stripe";
 
 export const runtime = "nodejs";
@@ -19,6 +19,18 @@ export async function POST() {
   }
 
   await ensureSchema();
+  const active = await db()`
+    SELECT id FROM subscriptions
+    WHERE user_id = ${userId} AND status = 'active'
+    LIMIT 1
+  `;
+  if (active[0]) {
+    return NextResponse.json(
+      { error: "Esta conta já tem o acesso vitalício. A compra é única, não há segunda cobrança." },
+      { status: 409 },
+    );
+  }
+
   const users = await db()`
     SELECT email, full_name, cpf, phone FROM users WHERE id = ${userId} LIMIT 1
   `;
@@ -34,7 +46,7 @@ export async function POST() {
       client_reference_id: userId,
       metadata: {
         userId,
-        plan: ANNUAL.id,
+        plan: LIFETIME.id,
         fullName: fullName || "",
         cpf: users[0]?.cpf ? String(users[0].cpf) : "",
       },
@@ -42,11 +54,11 @@ export async function POST() {
         {
           quantity: 1,
           price_data: {
-            currency: ANNUAL.currency,
-            unit_amount: ANNUAL.amountCents,
+            currency: LIFETIME.currency,
+            unit_amount: LIFETIME.amountCents,
             product_data: {
-              name: ANNUAL.name,
-              description: `${ANNUAL.promise} Inclui painel 24h, dados, empresa, site, destrava acessos, drivers e softwares. ${ANNUAL.installmentCount}x de ${INSTALLMENT_LABEL}.`,
+              name: LIFETIME.name,
+              description: `${LIFETIME.promise} Pagamento único, sem mensalidade. Inclui painel 24h, dados, empresa, site, internet de volta, destrava acessos, drivers e softwares. ${LIFETIME.installmentCount}x de ${INSTALLMENT_LABEL}.`,
             },
           },
         },
@@ -71,7 +83,7 @@ export async function POST() {
         client_reference_id: userId,
         metadata: {
         userId,
-        plan: ANNUAL.id,
+        plan: LIFETIME.id,
         fullName: fullName || "",
         cpf: users[0]?.cpf ? String(users[0].cpf) : "",
       },
@@ -79,11 +91,11 @@ export async function POST() {
           {
             quantity: 1,
             price_data: {
-              currency: ANNUAL.currency,
-              unit_amount: ANNUAL.amountCents,
+              currency: LIFETIME.currency,
+              unit_amount: LIFETIME.amountCents,
               product_data: {
-                name: ANNUAL.name,
-                description: ANNUAL.promise,
+                name: LIFETIME.name,
+                description: LIFETIME.promise,
               },
             },
           },

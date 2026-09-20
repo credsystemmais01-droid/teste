@@ -65,6 +65,10 @@ export async function ensureSchema() {
   await migrate`ALTER TABLE users ADD COLUMN IF NOT EXISTS google_id TEXT`;
   await migrate`ALTER TABLE users ADD COLUMN IF NOT EXISTS auth_provider TEXT NOT NULL DEFAULT 'email'`;
   await migrate`ALTER TABLE users ALTER COLUMN password_hash DROP NOT NULL`;
+  await migrate`ALTER TABLE users ADD COLUMN IF NOT EXISTS trial_started_at TIMESTAMPTZ`;
+  await migrate`ALTER TABLE machines ADD COLUMN IF NOT EXISTS gmail TEXT`;
+  await migrate`CREATE UNIQUE INDEX IF NOT EXISTS machines_gmail_unique
+    ON machines (lower(gmail)) WHERE gmail IS NOT NULL AND gmail <> ''`;
   migrated = true;
 }
 

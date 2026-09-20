@@ -2,11 +2,13 @@ export function PackageInfo() {
   return (
     <section className="package-info">
       <div className="pay-hero">
-        <p className="tiny">O que entra no anual</p>
+        <p className="tiny">O que entra na compra única</p>
         <h2>Antes do valor, o que você recebe</h2>
         <p className="muted">
-          O pacote Guardian Proteção é anual. Por 12 meses o painel Limpa e Protege fica
-          ativo: limpa, protege e acompanha — 24 horas, sem parar.
+          O pacote Guardian Proteção é uma compra única, de acesso vitalício. Você paga uma
+          só vez e o painel Limpa e Protege fica seu para sempre, com 5 anos de atualização
+          do serviço: limpa, protege e acompanha o computador e o notebook — 24 horas, sem
+          parar, sem mensalidade e sem renovação.
         </p>
       </div>
 
@@ -23,7 +25,7 @@ export function PackageInfo() {
           <div className="ico">◈</div>
           <h3>Sua empresa</h3>
           <p>
-            A narrativa de proteção vale para a operação: máquina, acessos e o
+            A proteção vale para a operação inteira: máquina, acessos e o
             cotidiano da empresa, não só o computador de casa.
           </p>
         </article>
@@ -43,7 +45,23 @@ export function PackageInfo() {
           <h3>Escudo 24 horas no painel</h3>
           <p className="muted">
             O Guardião acompanha a máquina, o diagnóstico e o pacote. Depois de
-            ativar, o painel fica em estado protegido pelo ano inteiro.
+            ativar, o painel fica em estado protegido para sempre.
+          </p>
+        </article>
+        <article className="card info-block">
+          <p className="tiny">Internet de volta</p>
+          <h3>Rede que voltou a responder</h3>
+          <p className="muted">
+            Vírus que derruba a conexão, DNS sequestrado, proxy estranho e porta
+            fechada. O botão Fazer internet voltar refaz esse caminho no painel.
+          </p>
+        </article>
+        <article className="card info-block">
+          <p className="tiny">Máquina segura sempre</p>
+          <h3>Vigilância que não acaba</h3>
+          <p className="muted">
+            Manter máquina segura deixa o escudo permanente ligado no computador e
+            no notebook. Você comprou uma vez; a proteção não tem data de fim.
           </p>
         </article>
         <article className="card info-block">
@@ -79,8 +97,8 @@ export function PackageInfo() {
           <li>Você cria a conta com nome, CPF, WhatsApp e e-mail — ou entra com o Google.</li>
           <li>No painel, informa a máquina e marca os sintomas do diagnóstico.</li>
           <li>O console mostra a leitura e o log do Guardião.</li>
-          <li>No checkout, você ativa o anual. A cobrança sai pela Stripe, em nome da Guardian Proteção.</li>
-          <li>Depois do pagamento, o painel fica protegido por 12 meses.</li>
+          <li>No checkout, você ativa a compra permanente. A cobrança sai pela Stripe, em nome da Guardian Proteção.</li>
+          <li>Depois do pagamento, o painel fica protegido para sempre, sem renovar nada.</li>
         </ol>
       </article>
     </section>

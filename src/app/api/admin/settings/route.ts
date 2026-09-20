@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { requireAdmin, upsertSetting } from "@/lib/admin";
+import { clampTrialDays } from "@/lib/trial";
 
 export async function PATCH(request: Request) {
   const admin = await requireAdmin();
@@ -19,6 +20,13 @@ export async function PATCH(request: Request) {
       "default_log_read_seconds",
       String(Number.isFinite(seconds) && seconds > 0 ? Math.min(300, Math.max(2, Math.round(seconds))) : 8),
     );
+  }
+
+  if (body.trialEnabled !== undefined) {
+    await upsertSetting("trial_enabled", body.trialEnabled ? "1" : "0");
+  }
+  if (body.trialDays !== undefined) {
+    await upsertSetting("trial_days", String(clampTrialDays(body.trialDays)));
   }
 
   return NextResponse.json({ ok: true });

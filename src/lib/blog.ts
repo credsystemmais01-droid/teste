@@ -58,7 +58,7 @@ export const POSTS: BlogPost[] = [
       },
       {
         type: "p",
-        text: "Remover vírus e ativar proteção pedem o pacote. Residencial cuida do PC, das fotos e dos documentos. Empresa cobre o time e o site. Site Blindado concentra a narrativa de anti-malware e anti-hack no endereço da empresa.",
+        text: "Remover vírus e ativar proteção pedem o pacote. Residencial cuida do PC, das fotos e dos documentos. Empresa cobre o time e o site. Site Blindado concentra o anti-malware e o anti-hack no endereço da empresa.",
       },
       {
         type: "p",
@@ -228,7 +228,7 @@ export const POSTS: BlogPost[] = [
       },
       {
         type: "p",
-        text: "No reconhecimento de vírus, marque o que você está sentindo. Se o antivírus antigo está desligado ou os pop-ups não param, o passo seguinte é o pacote: limpeza narrativa + proteção contínua + softwares no ritmo certo para o escudo não trabalhar em cima de um buraco aberto.",
+        text: "No reconhecimento de vírus, marque o que você está sentindo. Se o antivírus antigo está desligado ou os pop-ups não param, o passo seguinte é o pacote: limpeza + proteção contínua + softwares no ritmo certo, para o escudo não trabalhar em cima de um buraco aberto.",
       },
     ],
   },
@@ -251,7 +251,7 @@ export const POSTS: BlogPost[] = [
       },
       {
         type: "p",
-        text: "Entrar no computador e fazer checagem estão liberados. Remover vírus e ativar proteção pedem o pacote. Se ainda não pagou, o painel bloqueia a limpeza e o escudo e aponta um único caminho: Pagar e proteger agora.",
+        text: "Entrar no computador e fazer checagem estão liberados. Remover vírus, ativar proteção, fazer a internet voltar e manter a máquina segura pedem o pacote. Se ainda não pagou, o painel bloqueia a limpeza e o escudo e aponta um único caminho: Pagar e proteger agora.",
       },
       {
         type: "h2",
@@ -262,12 +262,12 @@ export const POSTS: BlogPost[] = [
         items: [
           "Residencial — pessoa física. PC, fotos e documentos 24h.",
           "Empresa — CNPJ e time. Máquinas + site da empresa.",
-          "Site Blindado — quem vive do endereço na web. Anti-malware e anti-hack na narrativa do site.",
+          "Site Blindado — quem vive do endereço na web. Anti-malware e anti-hack no endereço do site.",
         ],
       },
       {
         type: "p",
-        text: "Os nomes dos planos já estão definidos. O valor de cada um o administrador publica quando fechar o preço. Até lá, a tela mostra Preço a definir e a ativação de demonstração grava o pacote na conta para você ver o estado Protegido.",
+        text: "O pacote Guardian Proteção é uma compra permanente: um pagamento único, sem mensalidade e sem renovação. Depois da confirmação da Stripe, o painel grava o pacote na conta e a máquina passa para o estado Protegido, para sempre.",
       },
       {
         type: "h2",
@@ -287,11 +287,11 @@ export const POSTS: BlogPost[] = [
       },
       {
         type: "p",
-        text: "O painel não volta para o começo no F5. A assinatura fica no banco. Remover vírus e ativar proteção passam a rodar o console de limpeza e o card: Escudo ativo. Você está protegido 24 horas. Sem parar.",
+        text: "O painel não volta para o começo no F5: a compra permanente fica gravada na conta. Remover vírus, fazer a internet voltar e manter a máquina segura passam a rodar o console e o card: Escudo ativo. Você está protegido 24 horas. Sem parar.",
       },
       {
         type: "p",
-        text: "Quando o gateway de pagamento entrar, o mesmo checkout recebe o cartão ou o Pix. O fluxo que você vê hoje já é o caminho comercial: diagnóstico → pacote → Guardião ligado.",
+        text: "O checkout já recebe o cartão pela Stripe, com parcelamento em até 12 vezes. O caminho é sempre o mesmo: diagnóstico → compra permanente → Guardião ligado.",
       },
     ],
   },

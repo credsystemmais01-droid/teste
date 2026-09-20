@@ -6,6 +6,14 @@ import { useRouter } from "next/navigation";
 import { Brand } from "@/components/Brand";
 import { Copyright } from "@/components/Copyright";
 
+type AdminTrial = {
+  used: boolean;
+  active: boolean;
+  days: number;
+  daysLeft: number;
+  endsAt: string;
+};
+
 type AdminUser = {
   id: string;
   email: string;
@@ -16,6 +24,9 @@ type AdminUser = {
   resolvedDiagnosis: string;
   logReadSeconds: number | "";
   resolvedLogReadSeconds: number;
+  trial: AdminTrial;
+  paid: boolean;
+  machineCount: number;
 };
 
 type UserDraft = {
@@ -26,6 +37,14 @@ type UserDraft = {
 };
 
 const TIME_PRESETS = [5, 8, 15, 30, 60, 120, 180];
+const TRIAL_PRESETS = [3, 7, 14, 30];
+
+function trialLabel(trial: AdminTrial, paid: boolean) {
+  if (paid) return "acesso vitalício ativo";
+  if (!trial.used) return "ainda não começou o teste";
+  if (trial.active) return `teste rodando · ${trial.daysLeft} dia${trial.daysLeft > 1 ? "s" : ""} restante${trial.daysLeft > 1 ? "s" : ""}`;
+  return "teste encerrado";
+}
 
 function formatSeconds(value: string | number) {
   const n = Number(value);
@@ -85,6 +104,8 @@ export default function AdminPage() {
   const router = useRouter();
   const [defaultDiagnosis, setDefaultDiagnosis] = useState("");
   const [defaultLogReadSeconds, setDefaultLogReadSeconds] = useState("8");
+  const [trialEnabled, setTrialEnabled] = useState(true);
+  const [trialDays, setTrialDays] = useState("7");
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [drafts, setDrafts] = useState<Record<string, UserDraft>>({});
   const [error, setError] = useState("");
@@ -109,6 +130,8 @@ export default function AdminPage() {
     const data = await response.json();
     setDefaultDiagnosis(data.defaultRemoveDiagnosis || "");
     setDefaultLogReadSeconds(String(data.defaultLogReadSeconds || 8));
+    setTrialEnabled(data.trialEnabled !== false);
+    setTrialDays(String(data.trialDays || 7));
     setUsers(data.users || []);
     setDrafts(
       Object.fromEntries(
@@ -147,6 +170,8 @@ export default function AdminPage() {
       body: JSON.stringify({
         defaultRemoveDiagnosis: defaultDiagnosis,
         defaultLogReadSeconds,
+        trialEnabled,
+        trialDays,
       }),
     });
     if (!response.ok) {
@@ -154,6 +179,26 @@ export default function AdminPage() {
       return;
     }
     setSaved("Padrão salvo. Vale para contas sem tempo ou mensagem próprios.");
+    await load();
+  }
+
+  async function runTrialAction(userId: string, trialAction: "start" | "reset" | "end") {
+    setError("");
+    const response = await fetch("/api/admin/users", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ userId, trialAction }),
+    });
+    if (!response.ok) {
+      setError("Não foi possível mudar o teste desta conta.");
+      return;
+    }
+    const message = {
+      start: "Teste iniciado agora para esta conta.",
+      reset: "Teste liberado de novo. A conta pode começar um teste novo.",
+      end: "Teste encerrado. A conta volta a precisar do acesso vitalício.",
+    }[trialAction];
+    setSaved(message);
     await load();
   }
 
@@ -195,10 +240,11 @@ export default function AdminPage() {
 
       <section className="pay-hero">
         <p className="tiny">Administração</p>
-        <h1>Tempo do CMD e mensagem final</h1>
+        <h1>O que o cliente vê no painel</h1>
         <p className="muted">
-          Você define duas coisas: quanto tempo o console fica lendo, e qual texto aparece quando
-          essa leitura acaba. O cliente vê isso em “Fazer checagem” e em “Remover vírus”.
+          Aqui você define o tempo da leitura no console, o texto que aparece no fim e o teste
+          grátis de quem ainda não comprou. Dá para mudar o padrão de todo mundo ou conta por
+          conta.
         </p>
       </section>
 
@@ -232,6 +278,46 @@ export default function AdminPage() {
           Resumo: o CMD lê por {formatSeconds(defaultLogReadSeconds) || "—"} e depois mostra a
           mensagem padrão.
         </p>
+        <div className="field" style={{ margin: "6px 0 0" }}>
+          <label htmlFor="trialDays">3. Teste grátis para quem ainda não comprou</label>
+          <p className="admin-help">
+            Quantos dias a conta nova usa o painel completo antes de comprar: desbloqueio do
+            computador, internet, checagem e proteção.
+          </p>
+          <input
+            id="trialDays"
+            type="number"
+            min={1}
+            max={90}
+            value={trialDays}
+            onChange={(event) => setTrialDays(event.target.value)}
+          />
+          <div className="time-presets">
+            {TRIAL_PRESETS.map((days) => (
+              <button
+                key={days}
+                className={`btn btn-ghost time-chip${trialDays === String(days) ? " selected" : ""}`}
+                type="button"
+                onClick={() => setTrialDays(String(days))}
+              >
+                {days} dias
+              </button>
+            ))}
+          </div>
+        </div>
+        <label className="admin-toggle">
+          <input
+            type="checkbox"
+            checked={trialEnabled}
+            onChange={(event) => setTrialEnabled(event.target.checked)}
+          />
+          Deixar o botão de teste grátis aparecer no painel
+        </label>
+        <p className="muted">
+          {trialEnabled
+            ? `Conta nova vê o botão e ganha ${trialDays || 7} dias com tudo liberado.`
+            : "O botão de teste fica escondido. Só quem comprou usa o painel completo."}
+        </p>
         <button className="btn btn-blue" type="button" onClick={saveDefaults}>
           Salvar padrão
         </button>
@@ -253,6 +339,8 @@ export default function AdminPage() {
                 <strong>{user.email}</strong>
                 <p className="muted">
                   Nome no painel: {user.resolvedName || "ainda sem nome"}
+                  {` · ${trialLabel(user.trial, user.paid)}`}
+                  {` · ${user.machineCount} computador${user.machineCount === 1 ? "" : "es"}`}
                   {` · CMD: ${formatSeconds(user.resolvedLogReadSeconds)}`}
                   {user.removeDiagnosisEnabled
                     ? " · mensagem ligada"
@@ -301,6 +389,29 @@ export default function AdminPage() {
                   ? `Este cliente: o CMD lê ${formatSeconds(usedSeconds)} e depois mostra “${usedMessage.slice(0, 80) || "…"}${usedMessage.length > 80 ? "…" : ""}”.`
                   : "Este cliente: o CMD lê os logs e termina sem a sua mensagem, porque o interruptor está desligado."}
               </p>
+              <div className="cta-row" style={{ marginTop: 0 }}>
+                <button
+                  className="btn btn-ghost"
+                  type="button"
+                  onClick={() => runTrialAction(user.id, "start")}
+                >
+                  Iniciar teste agora
+                </button>
+                <button
+                  className="btn btn-ghost"
+                  type="button"
+                  onClick={() => runTrialAction(user.id, "reset")}
+                >
+                  Liberar teste de novo
+                </button>
+                <button
+                  className="btn btn-ghost"
+                  type="button"
+                  onClick={() => runTrialAction(user.id, "end")}
+                >
+                  Encerrar teste
+                </button>
+              </div>
               <button className="btn btn-purple" type="button" onClick={() => saveUser(user.id)}>
                 Salvar esta conta
               </button>

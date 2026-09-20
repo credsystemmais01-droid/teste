@@ -16,7 +16,7 @@ export default function PrivacidadePage() {
       <article className="article">
         <p className="tiny">Política de Privacidade</p>
         <h1>Política de Privacidade da {COMPANY}</h1>
-        <p className="muted">Última atualização: 8 de setembro de 2026.</p>
+        <p className="muted">Última atualização: 20 de setembro de 2026.</p>
         <p>
           Esta política descreve as informações que a {COMPANY} recolhe no site {PRODUCT} (
           {SITE_URL}), para que servem, com quem são compartilhadas, como você pode pedi-las e
@@ -26,7 +26,7 @@ export default function PrivacidadePage() {
 
         <h2>1. Quem é responsável</h2>
         <p>
-          O responsável pelos dados é a {COMPANY}, que comercializa o pacote anual {PRODUCT}.
+          O responsável pelos dados é a {COMPANY}, que comercializa o pacote permanente {PRODUCT}.
           Para falar sobre privacidade, use o e-mail {SUPPORT_EMAIL} ou a página{" "}
           <Link href="/suporte">de atendimento</Link>.
         </p>
@@ -59,7 +59,7 @@ export default function PrivacidadePage() {
         <ul>
           <li>Criar e autenticar a sua conta.</li>
           <li>Mostrar o painel, o diagnóstico e o estado da proteção.</li>
-          <li>Identificar o pagamento anual na Stripe, em nome da {COMPANY}.</li>
+          <li>Identificar o pagamento único na Stripe, em nome da {COMPANY}.</li>
           <li>Atender suporte, estorno e exigência legal.</li>
           <li>Melhorar o site e evitar abuso da conta.</li>
         </ul>

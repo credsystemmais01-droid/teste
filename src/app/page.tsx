@@ -5,6 +5,7 @@ import { ShieldVisual } from "@/components/ShieldVisual";
 import { PackageInfo } from "@/components/PackageInfo";
 import { PriceCard } from "@/components/PriceCard";
 import { POSTS } from "@/lib/blog";
+import { DEFAULT_TRIAL_DAYS } from "@/lib/trial";
 
 export default function HomePage() {
   return (
@@ -14,17 +15,20 @@ export default function HomePage() {
       <section className="hero">
         <div>
           <p className="tiny">Escudo contínuo</p>
+          <p className="price-badge">Compra única · acesso vitalício</p>
           <h1>
             Limpa e Protege o seu computador{" "}
             <span className="glow">24 horas. Sem parar.</span>
           </h1>
           <p className="muted">
-            Seus dados, fotos e documentos ficam sob escudo. Sua empresa e o seu site,
-            fora do alcance de hackers, malwares e trojans.
+            Compra única, acesso vitalício: você paga uma vez e o computador e o notebook
+            ficam protegidos para sempre, com 5 anos de atualização do serviço. Seus dados,
+            fotos e documentos sob escudo. Sua empresa e o seu site, fora do alcance de
+            hackers, malwares e trojans.
           </p>
           <div className="cta-row">
-            <Link className="btn btn-blue" href="/cadastro">
-              Criar conta
+            <Link className="btn btn-blue" href="/cadastro?next=/painel">
+              Criar conta e testar {DEFAULT_TRIAL_DAYS} dias grátis
             </Link>
             <Link className="btn btn-ghost" href="/login">
               Entrar no painel
@@ -35,12 +39,12 @@ export default function HomePage() {
           </div>
           <div className="stats">
             <div className="stat">
-              <b>24h</b>
-              <span className="muted">sem pausa</span>
+              <b>{DEFAULT_TRIAL_DAYS} dias</b>
+              <span className="muted">grátis, sem cartão</span>
             </div>
             <div className="stat">
-              <b>12</b>
-              <span className="muted">meses no anual</span>
+              <b>1x</b>
+              <span className="muted">compra única</span>
             </div>
             <div className="stat">
               <b>Stripe</b>

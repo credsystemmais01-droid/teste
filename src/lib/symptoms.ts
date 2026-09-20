@@ -24,6 +24,6 @@ export const PLANS = [
     id: "site",
     name: "Site Blindado",
     forWho: "Quem tem site",
-    promise: "Anti-malware / anti-hack na narrativa do site",
+    promise: "Anti-malware e anti-hack no endereço do site",
   },
 ] as const;
