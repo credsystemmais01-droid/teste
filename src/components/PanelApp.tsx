@@ -74,6 +74,60 @@ const CHECK_NAMES = [
   "memoria/processo-2201",
 ];
 
+const SCAN_PATHS = [
+  "documentos/contrato.docx",
+  "documentos/notas.pdf",
+  "documentos/relatorio.xlsx",
+  "documentos/recibo.pdf",
+  "fotos/IMG_1022.jpg",
+  "fotos/IMG_2041.jpg",
+  "fotos/IMG_3187.jpg",
+  "fotos/familia/natal.png",
+  "downloads/setup.exe",
+  "downloads/instalador.msi",
+  "downloads/anexo.zip",
+  "desktop/backup.zip",
+  "desktop/atalho.lnk",
+  "appdata/temp/cache.tmp",
+  "appdata/roaming/perfil.dat",
+  "appdata/local/navegador/cookies",
+  "windows/system32/drivers",
+  "windows/system32/svchost.exe",
+  "windows/prefetch/registro.pf",
+  "programas/navegador/chrome.exe",
+  "programas/escritorio/word.exe",
+  "programas/leitor/pdf.exe",
+  "memoria/processo-1844",
+  "memoria/processo-2201",
+  "memoria/processo-3390",
+  "rede/porta-80",
+  "rede/porta-443",
+  "rede/porta-445",
+  "rede/dns-cache",
+  "registro/HKLM/run",
+];
+
+const SCAN_STAGES = [
+  "varrendo memoria...",
+  "lendo eventlog...",
+  "conferindo assinaturas de malware...",
+  "checando conexoes de rede...",
+  "verificando drivers da maquina...",
+  "conferindo softwares instalados...",
+  "cruzando evidencias...",
+];
+
+const SCAN_RESULTS = ["ok", "limpo", "sem alteracao", "assinatura conferida", "integridade ok"];
+
+function scanLine(index: number) {
+  if (index % 9 === 8) {
+    return `> ${SCAN_STAGES[Math.floor(index / 9) % SCAN_STAGES.length]}`;
+  }
+  const path = SCAN_PATHS[index % SCAN_PATHS.length];
+  const result = SCAN_RESULTS[(index + Math.floor(index / SCAN_PATHS.length)) % SCAN_RESULTS.length];
+  return `> ${path} ... ${result}`;
+}
+
 const CHECK_LOG_LINES = (name: string) => [
   `> usuario: ${name}`,
   "> checagem iniciada",
@@ -295,6 +349,42 @@ export function PanelApp() {
     }, delay);
   }
 
+  function playTimedRead(
+    head: string[],
+    tail: string[],
+    seconds: number | undefined,
+    onDone: () => void,
+  ) {
+    if (playTimer.current) clearInterval(playTimer.current);
+    const total = Math.min(300, Math.max(2, Number(seconds) || 8)) * 1000;
+    const tick = Math.min(400, Math.max(60, Math.round(total / (head.length + 8))));
+    const started = Date.now();
+    const buffer: string[] = [];
+    let index = 0;
+
+    setLines([]);
+    setProgress(0);
+    setRunning(true);
+
+    playTimer.current = setInterval(() => {
+      const elapsed = Date.now() - started;
+      if (elapsed >= total) {
+        if (playTimer.current) clearInterval(playTimer.current);
+        playTimer.current = null;
+        tail.forEach((line) => buffer.push(line));
+        setLines(buffer.slice(-8));
+        setProgress(100);
+        setRunning(false);
+        onDone();
+        return;
+      }
+      buffer.push(index < head.length ? head[index] : scanLine(index - head.length));
+      setLines(buffer.slice(-8));
+      setProgress(Math.min(99, Math.round((elapsed / total) * 100)));
+      index += 1;
+    }, tick);
+  }
+
   async function refreshMe() {
     const response = await fetch("/api/me");
     if (!response.ok) {
@@ -418,18 +508,13 @@ export function PanelApp() {
     const machine = activeMachine?.name || machineName.trim() || "PC";
     setMachineName(machine);
     const name = me?.user.panelName || "conta";
-    playLines(ENTER_LINES(machine, name), () => setUnlocked(true), me?.logReadSeconds);
+    playTimedRead(
+      ENTER_LINES(machine, name),
+      ["> acesso liberado", "> computador desbloqueado"],
+      me?.logReadSeconds,
+      () => setUnlocked(true),
+    );
     void saveMachine("scanned", machine);
-  }
-
-  function buildDiagnosisScript(name: string, fresh: Me | null, base: string[]) {
-    const script = [...base];
-    if (fresh?.removeDiagnosis?.enabled && fresh.removeDiagnosis.text) {
-      script.push(...diagnosisLines(fresh.removeDiagnosis.text));
-    } else {
-      script.push("> leitura concluida.");
-    }
-    return script;
   }
 
   async function startTimedLog(kind: "remove" | "check") {
@@ -445,14 +530,19 @@ export function PanelApp() {
     setLines(["> iniciando leitura do log..."]);
     const fresh = (await refreshMe()) || me;
     const name = fresh?.user.panelName || me?.user.panelName || "conta";
-    const base = kind === "remove" ? REMOVE_LOG_LINES(name) : CHECK_LOG_LINES(name);
-    playLines(
-      buildDiagnosisScript(name, fresh, base),
+    const head = kind === "remove" ? REMOVE_LOG_LINES(name) : CHECK_LOG_LINES(name);
+    const tail =
+      fresh?.removeDiagnosis?.enabled && fresh.removeDiagnosis.text
+        ? diagnosisLines(fresh.removeDiagnosis.text)
+        : ["> leitura concluida."];
+    playTimedRead(
+      head,
+      tail,
+      fresh?.logReadSeconds ?? me?.logReadSeconds,
       () => {
         if (kind === "remove") setRemoveDone(true);
         else setCheckDone(true);
       },
-      fresh?.logReadSeconds ?? me?.logReadSeconds,
     );
   }
 
@@ -470,7 +560,13 @@ export function PanelApp() {
     const machine = activeMachine?.name || machineName.trim() || "PC";
     setMachineName(machine);
     const name = me?.user.panelName || "conta";
-    playLines(INTERNET_LINES(machine, name), () => setInternetDone(true), me?.logReadSeconds);
+    const internetScript = INTERNET_LINES(machine, name);
+    playTimedRead(
+      internetScript.slice(0, -1),
+      ["> conexao restabelecida", internetScript[internetScript.length - 1]],
+      me?.logReadSeconds,
+      () => setInternetDone(true),
+    );
   }
 
   function startKeepSafe() {
@@ -482,13 +578,15 @@ export function PanelApp() {
     const machine = activeMachine?.name || machineName.trim() || "PC";
     setMachineName(machine);
     const name = me?.user.panelName || "conta";
-    playLines(
-      KEEP_SAFE_LINES(machine, name),
+    const keepScript = KEEP_SAFE_LINES(machine, name);
+    playTimedRead(
+      keepScript.slice(0, -1),
+      [keepScript[keepScript.length - 1]],
+      me?.logReadSeconds,
       () => {
         setKeepDone(true);
         if (access) void saveMachine("protected", machine).then(() => refreshMe());
       },
-      me?.logReadSeconds,
     );
   }
 

@@ -71,8 +71,8 @@ function TimePicker({
     <div className="field" style={{ margin: 0 }}>
       <label htmlFor={id}>1. Tempo da leitura no CMD</label>
       <p className="admin-help">
-        É o tempo que o console fica passando os nomes dos arquivos. Quando esse tempo acaba, a
-        mensagem final aparece.
+        O console fica passando os nomes dos arquivos durante todo esse tempo, sem parar antes.
+        Só quando o tempo acaba é que a mensagem final aparece.
       </p>
       <input
         id={id}
