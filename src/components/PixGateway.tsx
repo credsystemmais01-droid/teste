@@ -41,10 +41,10 @@ export function PixGateway() {
   const chargeId = useCheckoutCharge();
   const payload = usePixPayload(chargeId);
   const [copied, setCopied] = useState(false);
-  const [paid, setPaid] = useState(false);
+  const [phase, setPhase] = useState<"wait" | "processing" | "paid">("wait");
 
   useEffect(() => {
-    if (!chargeId) return;
+    if (!chargeId || phase !== "wait") return;
     let stop = false;
 
     async function look() {
@@ -54,7 +54,7 @@ export function PixGateway() {
         });
         if (!response.ok) return;
         const data = await response.json();
-        if (!stop && data.paid) setPaid(true);
+        if (!stop && data.paid) setPhase("processing");
       } catch {
         // A tela segue aguardando a leitura do QR.
       }
@@ -66,7 +66,13 @@ export function PixGateway() {
       stop = true;
       window.clearInterval(timer);
     };
-  }, [chargeId]);
+  }, [chargeId, phase]);
+
+  useEffect(() => {
+    if (phase !== "processing") return;
+    const timer = window.setTimeout(() => setPhase("paid"), 3400);
+    return () => window.clearTimeout(timer);
+  }, [phase]);
 
   async function copyPayload() {
     try {
@@ -77,14 +83,21 @@ export function PixGateway() {
     }
   }
 
+  const paid = phase === "paid";
+  const processing = phase === "processing";
+
   return (
     <div className="gw">
-      <div className={`gw-banner${paid ? " paid" : ""}`}>
-        {paid ? "Pagamento confirmado. Seus serviços estão disponíveis." : "Aguardando o Pix."}
+      <div className={`gw-banner${paid ? " paid" : ""}${processing ? " processing" : ""}`}>
+        {paid
+          ? "Pagamento confirmado. Seus serviços estão disponíveis."
+          : processing
+            ? "O banco está processando o pagamento."
+            : "Aguardando o Pix."}
       </div>
       <div className="gw-top">
         <Link href="/">← Guardian Proteção</Link>
-        <span>{paid ? "Pago" : "Checkout"}</span>
+        <span>{paid ? "Pago" : processing ? "Processando" : "Checkout"}</span>
       </div>
       <div className="gw-shell">
         <aside className="gw-summary">
@@ -108,12 +121,29 @@ export function PixGateway() {
           <p className="gw-note">
             {paid
               ? "O Pix foi recebido. A assinatura anual está ativa e os serviços já podem ser usados."
-              : "Aponte a câmera da conta no QR. O valor sai do saldo e esta tela confirma o pagamento."}
+              : processing
+                ? "A confirmação chegou. O banco está concluindo o Pix antes de liberar a tela."
+                : "Aponte a câmera da conta no QR. Confirme no app para o banco processar o pagamento."}
           </p>
         </aside>
 
         <section className="gw-pay">
-          {paid ? (
+          {processing ? (
+            <div className="gw-bank" role="status" aria-live="polite">
+              <div className="gw-bank-mark" aria-hidden />
+              <p className="gw-thanks-kicker">Banco</p>
+              <h2>Processando pagamento</h2>
+              <p className="gw-bank-copy">O Pix de {price} está sendo confirmado.</p>
+              <div className="gw-bank-track">
+                <span />
+              </div>
+              <ol className="gw-bank-steps">
+                <li>Pagamento confirmado na conta</li>
+                <li>Banco processando o Pix</li>
+                <li>Liberando os serviços</li>
+              </ol>
+            </div>
+          ) : paid ? (
             <div className="gw-thanks">
               <p className="gw-thanks-kicker">Pagamento recebido</p>
               <h2>Obrigado pelo pagamento</h2>

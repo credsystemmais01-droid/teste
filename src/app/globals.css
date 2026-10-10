@@ -645,7 +645,58 @@ button, input, textarea { font: inherit; }
   color: #146c36;
   border-bottom-color: #b7e4c7;
 }
-.gw-thanks { text-align: left; }
+.gw-banner.processing {
+  background: #eef2ff;
+  color: #3d3489;
+  border-bottom-color: #d9defe;
+}
+.gw-bank { text-align: left; animation: gw-fade 0.35s ease; }
+.gw-bank h2 { margin: 8px 0 0; font-size: 28px; letter-spacing: -0.03em; }
+.gw-bank-mark {
+  width: 54px;
+  height: 54px;
+  margin-bottom: 14px;
+  border-radius: 50%;
+  border: 3px solid #e6ebf1;
+  border-top-color: #635bff;
+  animation: gw-spin 0.8s linear infinite;
+}
+.gw-bank-copy { margin: 8px 0 16px; color: #6b7c93; }
+.gw-bank-track {
+  height: 8px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #e6ebf1;
+}
+.gw-bank-track span {
+  display: block;
+  height: 100%;
+  width: 0;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #635bff, #32d296);
+  animation: gw-fill 3.2s ease forwards;
+}
+.gw-bank-steps {
+  margin: 16px 0 0;
+  padding: 0;
+  list-style: none;
+  color: #6b7c93;
+}
+.gw-bank-steps li {
+  margin: 8px 0;
+  opacity: 0.35;
+}
+.gw-bank-steps li:nth-child(1) { animation: gw-step 0.4s ease 0.2s forwards; }
+.gw-bank-steps li:nth-child(2) { animation: gw-step 0.4s ease 1.1s forwards; }
+.gw-bank-steps li:nth-child(3) { animation: gw-step 0.4s ease 2.1s forwards; }
+.gw-thanks { text-align: left; animation: gw-fade 0.45s ease; }
+@keyframes gw-spin { to { transform: rotate(360deg); } }
+@keyframes gw-fill { to { width: 100%; } }
+@keyframes gw-fade {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes gw-step { to { opacity: 1; color: #1a1f36; font-weight: 700; } }
 .gw-thanks-kicker {
   margin: 0;
   color: #146c36;
