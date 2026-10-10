@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { db, ensureSchema } from "@/lib/db";
 import {
+  getBlueScreenState,
   getDefaultLogReadSeconds,
   getDefaultRemoveDiagnosis,
   getTrialDays,
@@ -21,6 +22,7 @@ export async function GET() {
   const defaultLogReadSeconds = await getDefaultLogReadSeconds();
   const trialDays = await getTrialDays();
   const trialEnabled = await isTrialEnabled();
+  const blueScreen = await getBlueScreenState();
   const rows = await db()`
     SELECT u.id, u.email, u.display_name, u.panel_name, u.remove_diagnosis,
            u.remove_diagnosis_enabled, u.log_read_seconds, u.trial_started_at, u.created_at,
@@ -35,6 +37,13 @@ export async function GET() {
     defaultLogReadSeconds,
     trialDays,
     trialEnabled,
+    blueScreenText: blueScreen.text,
+    blueScreenSize: blueScreen.size,
+    blueScreenMode: blueScreen.mode,
+    blueScreenDuration: blueScreen.duration,
+    blueScreenStartedAt: blueScreen.startedAt,
+    blueScreenBg: blueScreen.bg,
+    serverNow: Date.now(),
     users: rows.map((row) => {
       const diagnosis = resolveRemoveDiagnosis(
         row.remove_diagnosis,

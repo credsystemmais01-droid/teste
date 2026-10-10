@@ -30,7 +30,7 @@ export async function POST() {
       {
         error: state.active
           ? "O seu teste grátis já está rodando."
-          : "Esta conta já usou o teste grátis. Para seguir protegido, ative o acesso vitalício.",
+          : "Esta conta já usou o teste grátis. Para seguir protegido, assine um dos planos.",
         trial: state,
       },
       { status: 409 },

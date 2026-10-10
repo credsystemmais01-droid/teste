@@ -7,9 +7,10 @@ export async function middleware(request: NextRequest) {
   const secret = process.env.SESSION_SECRET;
   if (!token || !secret) {
     const path = request.nextUrl.pathname;
+    const next = `${path}${request.nextUrl.search}`;
     const target =
       path === "/pagamento" || path.startsWith("/pagamento/")
-        ? "/cadastro?next=/pagamento"
+        ? `/cadastro?next=${encodeURIComponent(next)}`
         : "/login";
     return NextResponse.redirect(new URL(target, request.url));
   }

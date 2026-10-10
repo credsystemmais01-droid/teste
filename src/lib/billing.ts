@@ -1,7 +1,7 @@
 import { db, ensureSchema } from "@/lib/db";
-import { LIFETIME } from "@/lib/pricing";
+import { getPlan } from "@/lib/pricing";
 
-export async function activatePaidPlan(userId: string, providerRef: string) {
+export async function activatePaidPlan(userId: string, providerRef: string, planId: string) {
   await ensureSchema();
   const sql = db();
   const existing = await sql`
@@ -19,7 +19,7 @@ export async function activatePaidPlan(userId: string, providerRef: string) {
 
   await sql`
     INSERT INTO subscriptions (user_id, plan, status, provider_ref)
-    VALUES (${userId}, ${LIFETIME.id}, 'active', ${providerRef})
+    VALUES (${userId}, ${getPlan(planId)?.id || planId || "assinatura"}, 'active', ${providerRef})
   `;
   await sql`
     UPDATE machines SET status = 'protected'

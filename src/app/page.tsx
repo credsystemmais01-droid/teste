@@ -3,7 +3,7 @@ import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
 import { ShieldVisual } from "@/components/ShieldVisual";
 import { PackageInfo } from "@/components/PackageInfo";
-import { PriceCard } from "@/components/PriceCard";
+import { PlanGrid } from "@/components/PlanGrid";
 import { POSTS } from "@/lib/blog";
 import { DEFAULT_TRIAL_DAYS } from "@/lib/trial";
 
@@ -15,16 +15,15 @@ export default function HomePage() {
       <section className="hero">
         <div>
           <p className="tiny">Escudo contínuo</p>
-          <p className="price-badge">Compra única · acesso vitalício</p>
+          <p className="price-badge">3 assinaturas de segurança</p>
           <h1>
             Limpa e Protege o seu computador{" "}
             <span className="glow">24 horas. Sem parar.</span>
           </h1>
           <p className="muted">
-            Compra única, acesso vitalício: você paga uma vez e o computador e o notebook
-            ficam protegidos para sempre, com 5 anos de atualização do serviço. Seus dados,
-            fotos e documentos sob escudo. Sua empresa e o seu site, fora do alcance de
-            hackers, malwares e trojans.
+            Escolha a assinatura que cobre o seu computador, a sua empresa e o seu site.
+            Criptografia dos dados, fotos e documentos, com o Guardião vigiando 24 horas
+            enquanto o plano estiver ativo. Hackers, malwares e trojans ficam do lado de fora.
           </p>
           <div className="cta-row">
             <Link className="btn btn-blue" href="/cadastro?next=/painel">
@@ -43,8 +42,8 @@ export default function HomePage() {
               <span className="muted">grátis, sem cartão</span>
             </div>
             <div className="stat">
-              <b>1x</b>
-              <span className="muted">compra única</span>
+              <b>3 planos</b>
+              <span className="muted">mensal ou anual</span>
             </div>
             <div className="stat">
               <b>Stripe</b>
@@ -82,8 +81,16 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="price-home">
-        <PriceCard />
+      <section className="plans-intro">
+        <div className="pay-hero">
+          <p className="tiny">Assinaturas</p>
+          <h2>Três planos de segurança</h2>
+          <p className="muted">
+            Criptografia Security para o computador de casa, Guardian Proteção para empresa e
+            site, e Security z1 para um ano inteiro de escudo contínuo.
+          </p>
+        </div>
+        <PlanGrid includeTest />
       </section>
 
       <SiteFooter />

@@ -65,15 +65,41 @@ function RegisterForm() {
       <AuthExtraFields />
       <div className="field">
         <label htmlFor="email">E-mail da conta</label>
-        <input id="email" name="email" type="email" required autoComplete="email" />
+        <input
+          id="email"
+          name="email"
+          type="email"
+          required
+          autoComplete="email"
+          placeholder="seu@email.com"
+          enterKeyHint="next"
+        />
       </div>
       <div className="field">
         <label htmlFor="password">Senha</label>
-        <input id="password" name="password" type="password" required minLength={6} autoComplete="new-password" />
+        <input
+          id="password"
+          name="password"
+          type="password"
+          required
+          minLength={6}
+          autoComplete="new-password"
+          placeholder="Mínimo de 6 caracteres"
+          enterKeyHint="next"
+        />
       </div>
       <div className="field">
         <label htmlFor="confirm">Confirmar senha</label>
-        <input id="confirm" name="confirm" type="password" required minLength={6} autoComplete="new-password" />
+        <input
+          id="confirm"
+          name="confirm"
+          type="password"
+          required
+          minLength={6}
+          autoComplete="new-password"
+          placeholder="Repita a senha"
+          enterKeyHint="done"
+        />
       </div>
       <label className="terms-accept">
         <input name="accepted" type="checkbox" required />

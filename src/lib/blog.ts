@@ -58,7 +58,7 @@ export const POSTS: BlogPost[] = [
       },
       {
         type: "p",
-        text: "Remover vírus e ativar proteção pedem o pacote. Residencial cuida do PC, das fotos e dos documentos. Empresa cobre o time e o site. Site Blindado concentra o anti-malware e o anti-hack no endereço da empresa.",
+        text: "Remover vírus e ativar proteção pedem uma assinatura. Criptografia Security cuida do computador, das fotos e dos documentos. Criptografia Guardian Proteção cobre a empresa e o site. Criptografia Security z1 segura o escudo por um ano inteiro.",
       },
       {
         type: "p",
@@ -150,7 +150,7 @@ export const POSTS: BlogPost[] = [
       },
       {
         type: "p",
-        text: "Um driver desatualizado abre falha. Kit de vídeo, placa de rede e chipset antigos são porta comum para instabilidade e para software malicioso se esconder em erro de dispositivo. O pacote Residencial e o pacote Empresa tratam a máquina como um conjunto: limpeza, escudo e base técnica em dia.",
+        text: "Um driver desatualizado abre falha. Kit de vídeo, placa de rede e chipset antigos são porta comum para instabilidade e para software malicioso se esconder em erro de dispositivo. Criptografia Security e Criptografia Guardian Proteção tratam a máquina como um conjunto: limpeza, escudo e base técnica em dia.",
       },
       {
         type: "h2",
@@ -211,7 +211,7 @@ export const POSTS: BlogPost[] = [
       },
       {
         type: "p",
-        text: "Remover o vírus e deixar o software velho é convidar o mesmo trojan de volta. O Guardião trata atualização como camada de proteção, junto com a checagem e o escudo 24h. No plano Empresa e no Site Blindado, software atrasado no servidor ou no painel do site é risco direto de queda e de invasão.",
+        text: "Remover o vírus e deixar o software velho é convidar o mesmo trojan de volta. O Guardião trata atualização como camada de proteção, junto com a checagem e o escudo 24h. Em Criptografia Guardian Proteção e em Criptografia Security z1, software atrasado no servidor ou no painel do site é risco direto de queda e de invasão.",
       },
       {
         type: "h2",
@@ -236,7 +236,7 @@ export const POSTS: BlogPost[] = [
     slug: "checkout-pacotes",
     title: "Checkout: como ativar o pacote Limpa e Protege",
     excerpt:
-      "Residencial, Empresa ou Site Blindado. O checkout é o momento em que o diagnóstico vira proteção contínua.",
+      "Criptografia Security, Guardian Proteção ou Security z1. O checkout é o momento em que o diagnóstico vira proteção contínua.",
     category: "Checkout",
     date: "2026-09-05",
     readMinutes: 4,
@@ -260,14 +260,14 @@ export const POSTS: BlogPost[] = [
       {
         type: "ul",
         items: [
-          "Residencial — pessoa física. PC, fotos e documentos 24h.",
-          "Empresa — CNPJ e time. Máquinas + site da empresa.",
-          "Site Blindado — quem vive do endereço na web. Anti-malware e anti-hack no endereço do site.",
+          "Criptografia Security — R$ 597 por mês. Computador, fotos e documentos sob criptografia.",
+          "Criptografia Guardian Proteção — R$ 497 por mês. Computador, empresa e site contra hacker, malware e trojan.",
+          "Criptografia Security z1 — R$ 4.227 por ano. Doze meses de escudo contínuo, sem interrupção.",
         ],
       },
       {
         type: "p",
-        text: "O pacote Guardian Proteção é uma compra permanente: um pagamento único, sem mensalidade e sem renovação. Depois da confirmação da Stripe, o painel grava o pacote na conta e a máquina passa para o estado Protegido, para sempre.",
+        text: "Cada plano é uma assinatura: a Stripe cobra no mês ou no ano, e o painel grava o plano na conta. Enquanto a assinatura estiver ativa, a máquina passa para o estado Protegido.",
       },
       {
         type: "h2",
@@ -287,11 +287,11 @@ export const POSTS: BlogPost[] = [
       },
       {
         type: "p",
-        text: "O painel não volta para o começo no F5: a compra permanente fica gravada na conta. Remover vírus, fazer a internet voltar e manter a máquina segura passam a rodar o console e o card: Escudo ativo. Você está protegido 24 horas. Sem parar.",
+        text: "O painel não volta para o começo no F5: a assinatura fica gravada na conta. Remover vírus, fazer a internet voltar e manter a máquina segura passam a rodar o console e o card: Escudo ativo. Você está protegido 24 horas. Sem parar.",
       },
       {
         type: "p",
-        text: "O checkout já recebe o cartão pela Stripe, com parcelamento em até 12 vezes. O caminho é sempre o mesmo: diagnóstico → compra permanente → Guardião ligado.",
+        text: "O checkout recebe o cartão pela Stripe, na recorrência do plano escolhido. O caminho é sempre o mesmo: diagnóstico → assinatura → Guardião ligado.",
       },
     ],
   },

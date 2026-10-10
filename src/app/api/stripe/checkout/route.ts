@@ -1,14 +1,42 @@
 import { NextResponse } from "next/server";
+import type Stripe from "stripe";
 import { getUserId } from "@/lib/auth";
 import { db, ensureSchema } from "@/lib/db";
-import { LIFETIME, INSTALLMENT_LABEL } from "@/lib/pricing";
+import { getPlan, type Plan } from "@/lib/pricing";
 import { getStripe, siteUrl } from "@/lib/stripe";
 
 export const runtime = "nodejs";
 
-export async function POST() {
+async function resolvePriceId(stripe: Stripe, plan: Plan) {
+  const prices = await stripe.prices.list({
+    active: true,
+    limit: 100,
+    expand: ["data.product"],
+  });
+  const match = prices.data.find((price) => {
+    const product = price.product;
+    const name = typeof product === "object" && product && "name" in product && !product.deleted
+      ? product.name
+      : "";
+    return (
+      name === plan.name &&
+      price.unit_amount === plan.amountCents &&
+      price.currency === plan.currency &&
+      price.recurring?.interval === plan.interval
+    );
+  });
+  return match?.id;
+}
+
+export async function POST(request: Request) {
   const userId = await getUserId();
   if (!userId) return NextResponse.json({ error: "Não autenticado" }, { status: 401 });
+
+  const body = await request.json().catch(() => ({}));
+  const plan = getPlan(String(body.plan || ""));
+  if (!plan) {
+    return NextResponse.json({ error: "Escolha uma das três assinaturas." }, { status: 400 });
+  }
 
   const stripe = getStripe();
   if (!stripe) {
@@ -26,7 +54,7 @@ export async function POST() {
   `;
   if (active[0]) {
     return NextResponse.json(
-      { error: "Esta conta já tem o acesso vitalício. A compra é única, não há segunda cobrança." },
+      { error: "Esta conta já tem uma assinatura ativa. Não há segunda cobrança." },
       { status: 409 },
     );
   }
@@ -37,74 +65,45 @@ export async function POST() {
   const email = users[0] ? String(users[0].email) : undefined;
   const fullName = users[0]?.full_name ? String(users[0].full_name) : undefined;
   const origin = siteUrl();
+  const metadata = {
+    userId,
+    plan: plan.id,
+    fullName: fullName || "",
+    cpf: users[0]?.cpf ? String(users[0].cpf) : "",
+  };
 
   try {
+    const priceId = await resolvePriceId(stripe, plan);
     const session = await stripe.checkout.sessions.create({
-      mode: "payment",
+      mode: "subscription",
       locale: "pt-BR",
       customer_email: email,
       client_reference_id: userId,
-      metadata: {
-        userId,
-        plan: LIFETIME.id,
-        fullName: fullName || "",
-        cpf: users[0]?.cpf ? String(users[0].cpf) : "",
-      },
+      metadata,
+      subscription_data: { metadata },
       line_items: [
-        {
-          quantity: 1,
-          price_data: {
-            currency: LIFETIME.currency,
-            unit_amount: LIFETIME.amountCents,
-            product_data: {
-              name: LIFETIME.name,
-              description: `${LIFETIME.promise} Pagamento único, sem mensalidade. Inclui painel 24h, dados, empresa, site, internet de volta, destrava acessos, drivers e softwares. ${LIFETIME.installmentCount}x de ${INSTALLMENT_LABEL}.`,
+        priceId
+          ? { quantity: 1, price: priceId }
+          : {
+              quantity: 1,
+              price_data: {
+                currency: plan.currency,
+                unit_amount: plan.amountCents,
+                recurring: { interval: plan.interval },
+                product_data: {
+                  name: plan.name,
+                  description: plan.promise,
+                },
+              },
             },
-          },
-        },
       ],
-      payment_method_options: {
-        card: {
-          installments: { enabled: true },
-        },
-      },
       success_url: `${origin}/api/stripe/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${origin}/pagamento`,
+      cancel_url: `${origin}/pagamento?plano=${plan.id}`,
     });
 
     return NextResponse.json({ url: session.url });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Falha ao abrir o Stripe.";
-    if (message.toLowerCase().includes("installment")) {
-      const session = await stripe.checkout.sessions.create({
-        mode: "payment",
-        locale: "pt-BR",
-        customer_email: email,
-        client_reference_id: userId,
-        metadata: {
-        userId,
-        plan: LIFETIME.id,
-        fullName: fullName || "",
-        cpf: users[0]?.cpf ? String(users[0].cpf) : "",
-      },
-        line_items: [
-          {
-            quantity: 1,
-            price_data: {
-              currency: LIFETIME.currency,
-              unit_amount: LIFETIME.amountCents,
-              product_data: {
-                name: LIFETIME.name,
-                description: LIFETIME.promise,
-              },
-            },
-          },
-        ],
-        success_url: `${origin}/api/stripe/success?session_id={CHECKOUT_SESSION_ID}`,
-        cancel_url: `${origin}/pagamento`,
-      });
-      return NextResponse.json({ url: session.url });
-    }
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }

@@ -4,14 +4,14 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Brand } from "@/components/Brand";
 import { PackageInfo } from "@/components/PackageInfo";
-import { PriceCard } from "@/components/PriceCard";
+import { PlanGrid } from "@/components/PlanGrid";
 import { SiteFooter } from "@/components/SiteFooter";
 
 export default function PagamentoPage() {
   const [symptoms, setSymptoms] = useState<string[]>([]);
   const [paid, setPaid] = useState(false);
   const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [loadingPlan, setLoadingPlan] = useState("");
 
   useEffect(() => {
     fetch("/api/me")
@@ -22,12 +22,16 @@ export default function PagamentoPage() {
       });
   }, []);
 
-  async function pay() {
-    setLoading(true);
+  async function pay(plan: string) {
+    setLoadingPlan(plan);
     setError("");
-    const response = await fetch("/api/stripe/checkout", { method: "POST" });
+    const response = await fetch("/api/stripe/checkout", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ plan }),
+    });
     const data = await response.json();
-    setLoading(false);
+    setLoadingPlan("");
     if (!response.ok) {
       setError(data.error || "Não foi possível abrir o pagamento.");
       return;
@@ -57,19 +61,20 @@ export default function PagamentoPage() {
       <main className="wrap">
       <section className="pay-hero">
         <p className="tiny">Checkout</p>
-        <h1>Ativar o acesso vitalício Guardian</h1>
+        <h1>Escolha a assinatura de segurança</h1>
         <p className="muted">
-          Leia o que entra no acesso vitalício. É uma compra única, de valor fixo, sem
-          mensalidade e sem renovação — o valor aparece por último, antes de pagar na Stripe.
+          São três planos: Criptografia Security, Criptografia Guardian Proteção e Criptografia
+          Security z1. A proteção fica ligada enquanto a assinatura estiver ativa. A cobrança
+          sai pela Stripe, em nome da Guardian Proteção.
         </p>
       </section>
 
       {paid ? (
         <section className="success-card">
-          <h2>Esta conta já tem o acesso vitalício.</h2>
+          <h2>Esta conta já tem uma assinatura ativa.</h2>
           <p>
-            A compra é única e já está registrada: computador e notebook seguem protegidos 24
-            horas, para sempre. Não existe segunda cobrança, mensalidade nem renovação.
+            O plano está registrado: computador e notebook seguem sob o escudo 24 horas enquanto
+            a assinatura estiver em dia.
           </p>
           <Link className="btn btn-blue" href="/painel">
             Voltar ao painel protegido
@@ -92,9 +97,8 @@ export default function PagamentoPage() {
       {!paid ? (
         <>
           <PackageInfo />
-          <section className="price-home">
-            <PriceCard wide action="pay" loading={loading} error={error} onPay={pay} />
-          </section>
+          {error ? <p className="error">{error}</p> : null}
+          <PlanGrid action="pay" loadingPlan={loadingPlan} includeTest onPay={pay} />
         </>
       ) : null}
       <SiteFooter />

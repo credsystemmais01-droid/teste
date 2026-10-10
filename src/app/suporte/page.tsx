@@ -39,7 +39,7 @@ export default function SuportePage() {
             <Link href="/login">Entrar no painel</Link>
           </li>
           <li>
-            <Link href="/pagamento">Checkout da compra permanente</Link>
+            <Link href="/pagamento">Checkout das assinaturas</Link>
           </li>
           <li>
             <Link href="/privacidade">Política de Privacidade</Link>

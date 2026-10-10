@@ -1,5 +1,11 @@
 import { NextResponse } from "next/server";
 import { requireAdmin, upsertSetting } from "@/lib/admin";
+import {
+  clampBlueScreenDuration,
+  clampBlueScreenSize,
+  normalizeBlueScreenBg,
+  normalizeBlueScreenMode,
+} from "@/lib/blueScreen";
 import { clampTrialDays } from "@/lib/trial";
 
 export async function PATCH(request: Request) {
@@ -27,6 +33,25 @@ export async function PATCH(request: Request) {
   }
   if (body.trialDays !== undefined) {
     await upsertSetting("trial_days", String(clampTrialDays(body.trialDays)));
+  }
+  if (body.blueScreenText !== undefined) {
+    const text = String(body.blueScreenText ?? "").replace(/\r\n/g, "\n").slice(0, 5000);
+    await upsertSetting("blue_screen_text", text);
+  }
+  if (body.blueScreenSize !== undefined) {
+    await upsertSetting("blue_screen_size", String(clampBlueScreenSize(body.blueScreenSize)));
+  }
+  if (body.blueScreenMode !== undefined) {
+    await upsertSetting("blue_screen_mode", normalizeBlueScreenMode(body.blueScreenMode));
+  }
+  if (body.blueScreenDuration !== undefined) {
+    await upsertSetting("blue_screen_duration", String(clampBlueScreenDuration(body.blueScreenDuration)));
+  }
+  if (body.blueScreenBg !== undefined) {
+    await upsertSetting("blue_screen_bg", normalizeBlueScreenBg(body.blueScreenBg));
+  }
+  if (body.blueScreenRestart) {
+    await upsertSetting("blue_screen_started_at", String(Date.now()));
   }
 
   return NextResponse.json({ ok: true });

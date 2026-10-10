@@ -4,9 +4,13 @@
 .env*.local
 node_modules
 .next
+.data
 .vercel
 *.tsbuildinfo
 
+
+.vercel
+.env*
 
 .vercel
 .env*

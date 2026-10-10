@@ -151,17 +151,17 @@ const INTERNET_LINES = (machine: string, name: string) => [
 ];
 
 const KEEP_SAFE_LINES = (machine: string, name: string) => [
-  "Limpa e Protege — proteção permanente",
+  "Limpa e Protege — escudo da assinatura",
   "--------------------------------",
   `> usuario: ${name}`,
   `> maquina: ${machine}`,
-  "> escudo permanente: ligando...",
+  "> escudo 24h: ligando...",
   "> vigiando memoria e processos...",
   "> vigiando documentos, fotos e downloads...",
   "> vigiando rede, site e acessos...",
   "> conferindo drivers da maquina...",
   "> conferindo softwares do dia a dia...",
-  "> compra permanente confirmada: sem validade",
+  "> assinatura confirmada: escudo no periodo contratado",
   "> escudo 24h ativo | computador e notebook",
 ];
 
@@ -172,7 +172,7 @@ const CONNECT_LINES = (machine: string, gmail: string) => [
   `> conta vinculada: ${gmail}`,
   "> abrindo canal seguro...",
   "> conferindo identidade da conta...",
-  "> vinculando computador ao acesso vitalicio...",
+  "> vinculando computador a assinatura...",
   "> registrando no escudo 24h...",
   "> computador conectado",
 ];
@@ -673,7 +673,7 @@ export function PanelApp() {
               : "Conta conectada. O administrador ainda não definiu o nome desta conta."}
           </p>
           <p className="muted">Login: {me.user.email}</p>
-          {paid ? <p className="price-badge">Acesso vitalício ativo</p> : null}
+          {paid ? <p className="price-badge">Assinatura ativa</p> : null}
           {trialActive ? (
             <p className="price-badge trial-badge">
               Teste grátis · {trial?.daysLeft} dia{trial?.daysLeft === 1 ? "" : "s"} restante
@@ -701,7 +701,7 @@ export function PanelApp() {
               {trialLoading ? "Liberando..." : `Começar teste grátis de ${trialDays} dias`}
             </button>
             <Link className="btn btn-ghost" href="/pagamento">
-              Ver o acesso vitalício
+              Ver as assinaturas
             </Link>
           </div>
         </section>
@@ -715,11 +715,11 @@ export function PanelApp() {
           </h2>
           <p className="muted">
             Está tudo liberado no painel e nenhum cartão foi pedido. Para não perder a proteção
-            quando o teste acabar, garanta o acesso vitalício — compra única, sem mensalidade.
+            quando o teste acabar, assine um dos três planos de segurança.
           </p>
           <div className="cta-row">
             <Link className="btn btn-blue" href="/pagamento">
-              Garantir acesso vitalício
+              Ver os planos
             </Link>
           </div>
         </section>
@@ -729,11 +729,11 @@ export function PanelApp() {
         <section className="danger-card">
           <h2>Seu teste grátis terminou</h2>
           <p>
-            O painel completo — desbloqueio, internet, checagem e escudo 24h — volta com a compra
-            única de acesso vitalício.
+            O painel completo — desbloqueio, internet, checagem e escudo 24h — volta com uma
+            das três assinaturas de segurança.
           </p>
           <Link className="btn btn-blue" href="/pagamento">
-            Ativar acesso vitalício
+            Assinar um plano
           </Link>
         </section>
       ) : null}
@@ -840,7 +840,7 @@ export function PanelApp() {
         <button className="card action-card" onClick={startKeepSafe} type="button">
           <div className="ico">∞</div>
           <strong>Manter máquina segura</strong>
-          <span>Escudo permanente no computador e no notebook.</span>
+          <span>Escudo 24h no computador e no notebook, enquanto a assinatura estiver ativa.</span>
         </button>
       </div>
 
@@ -1008,7 +1008,7 @@ export function PanelApp() {
             <h2>Internet de volta em {machineName || "sua máquina"}.</h2>
             <p>
               Conexão restabelecida: DNS limpo, proxy removido, IP renovado e portas liberadas.
-              O escudo permanente segue vigiando a rede.
+              O escudo da assinatura segue vigiando a rede.
             </p>
           </section>
         ) : (
@@ -1017,10 +1017,10 @@ export function PanelApp() {
             <p>
               A leitura mostra a rede derrubada: DNS sequestrado, proxy estranho e portas
               fechadas por malware. Para fazer a internet voltar e manter a rede limpa, ative a
-              compra permanente do Limpa e Protege.
+              assinatura do Limpa e Protege.
             </p>
             <Link className="btn btn-blue" href="/pagamento">
-              Pagar uma vez e liberar a internet
+              Assinar e liberar a internet
             </Link>
           </section>
         )
@@ -1029,22 +1029,22 @@ export function PanelApp() {
       {view === "keep" && keepDone ? (
         access ? (
           <section className="success-card">
-            <h2>{me.user.panelName || "Sua conta"}, a máquina fica segura para sempre.</h2>
+            <h2>{me.user.panelName || "Sua conta"}, a máquina fica sob o escudo.</h2>
             <p>
-              Compra permanente ativa: computador e notebook sob escudo 24 horas, sem
-              mensalidade, sem renovação e sem data para acabar.
+              Assinatura ativa: computador e notebook sob escudo 24 horas enquanto o plano
+              estiver em dia.
             </p>
           </section>
         ) : (
           <section className="danger-card">
-            <h2>Deixe a máquina segura para sempre</h2>
+            <h2>Deixe a máquina sob o escudo</h2>
             <p>
-              O escudo permanente mantém computador e notebook vigiados 24 horas: memória,
-              documentos, fotos, rede, site, drivers e softwares. É uma compra única, sem
-              mensalidade e sem renovação.
+              A assinatura mantém computador e notebook vigiados 24 horas: memória,
+              documentos, fotos, rede, site, drivers e softwares. Escolha Security, Guardian
+              Proteção ou Security z1.
             </p>
             <Link className="btn btn-blue" href="/pagamento">
-              Pagar uma vez e proteger para sempre
+              Assinar e proteger agora
             </Link>
           </section>
         )
@@ -1056,8 +1056,8 @@ export function PanelApp() {
             Escudo ativo. {me.user.panelName || "Sua conta"}, você está protegido 24 horas. Sem parar.
           </h2>
           <p>
-            Dados, fotos, documentos, empresa e site — sob proteção permanente, no computador e
-            no notebook.
+            Dados, fotos, documentos, empresa e site — sob a proteção da assinatura, no computador
+            e no notebook, enquanto o plano estiver ativo.
           </p>
         </section>
       ) : null}

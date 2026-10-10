@@ -2,11 +2,11 @@ import Link from "next/link";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
 import { COMPANY, PRODUCT, SITE_URL, SUPPORT_EMAIL } from "@/lib/brand";
-import { PRICE_LABEL, INSTALLMENT_LABEL, LIFETIME } from "@/lib/pricing";
+import { PUBLIC_PLANS, formatBrlFromCents } from "@/lib/pricing";
 
 export const metadata = {
   title: `Termos de serviço | ${COMPANY}`,
-  description: `Termos de uso e serviço do pacote permanente ${PRODUCT}, da ${COMPANY}.`,
+  description: `Termos de uso e serviço das assinaturas ${PRODUCT}, da ${COMPANY}.`,
 };
 
 export default function TermosPage() {
@@ -25,11 +25,10 @@ export default function TermosPage() {
 
         <h2>1. O serviço</h2>
         <p>
-          O pacote é uma compra única, de acesso vitalício: o acesso ao painel não expira e o
-          serviço acompanha 5 anos de atualização, contados da data da compra. Ele inclui
-          diagnóstico, log, retorno da internet, destrava de acessos, atualização de drivers
-          e softwares, e a proteção 24 horas no computador, no notebook, nos dados, na
-          empresa e no site, conforme o pacote contratado.
+          O serviço é uma assinatura de segurança. Enquanto o plano estiver ativo, o painel
+          inclui diagnóstico, log, retorno da internet, destrava de acessos, atualização de
+          drivers e softwares, e a proteção 24 horas no computador, no notebook, nos dados,
+          na empresa e no site, conforme a assinatura escolhida.
         </p>
 
         <h2>2. Conta</h2>
@@ -42,16 +41,24 @@ export default function TermosPage() {
 
         <h2>3. Preço e pagamento</h2>
         <p>
-          O valor é {PRICE_LABEL}, ou {LIFETIME.installmentCount}x de {INSTALLMENT_LABEL}
-          quando a Stripe e o banco liberarem o parcelamento. É um pagamento único e
-          permanente, sem mensalidade e sem renovação. A cobrança é processada pela Stripe,
-          em nome da {COMPANY}.
+          Há três assinaturas, cobradas pela Stripe em nome da {COMPANY}:
+        </p>
+        <ul>
+          {PUBLIC_PLANS.map((plan) => (
+            <li key={plan.id}>
+              {plan.name}: {formatBrlFromCents(plan.amountCents)} {plan.intervalLabel}.
+            </li>
+          ))}
+        </ul>
+        <p>
+          A cobrança se repete no intervalo do plano (mês ou ano) até o cancelamento. O acesso
+          ao painel protegido vale enquanto a assinatura estiver em dia.
         </p>
 
         <h2>4. Ativação</h2>
         <p>
-          Depois do pagamento confirmado, o painel fica protegido de forma permanente. Se o
-          cartão recusar, o pacote não ativa.
+          Depois do pagamento confirmado, o painel fica protegido pelo período da assinatura.
+          Se o cartão recusar, o plano não ativa.
         </p>
 
         <h2>5. Uso aceitável</h2>

@@ -29,7 +29,7 @@ export async function POST(request: Request) {
     const userId = String(session.metadata?.userId || session.client_reference_id || "");
     const paid = session.payment_status === "paid" || session.status === "complete";
     if (userId && paid) {
-      await activatePaidPlan(userId, String(session.id));
+      await activatePaidPlan(userId, String(session.id), String(session.metadata?.plan || ""));
     }
   }
 

@@ -1,9 +1,7 @@
-import { LIFETIME } from "@/lib/pricing";
-
-export function PriceBenefits() {
+export function PriceBenefits({ items }: { items: string[] }) {
   return (
     <ul className="price-points">
-      {LIFETIME.benefits.map((item) => (
+      {items.map((item) => (
         <li key={item}>{item}</li>
       ))}
     </ul>

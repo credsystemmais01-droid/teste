@@ -1,57 +1,60 @@
 import Link from "next/link";
-import { LIFETIME, INSTALLMENT_LABEL, PRICE_LABEL } from "@/lib/pricing";
+import { formatBrlFromCents, type Plan } from "@/lib/pricing";
 import { PriceBenefits } from "@/components/PriceBenefits";
-import { DEFAULT_TRIAL_DAYS } from "@/lib/trial";
 
 type Props = {
-  wide?: boolean;
+  plan: Plan;
   action?: "links" | "pay";
   loading?: boolean;
-  error?: string;
-  onPay?: () => void;
+  disabled?: boolean;
+  onPay?: (planId: string) => void;
 };
 
-export function PriceCard({ wide, action = "links", loading, error, onPay }: Props) {
+export function PriceCard({ plan, action = "links", loading, disabled, onPay }: Props) {
+  const price = formatBrlFromCents(plan.amountCents);
+  const next = `/pagamento?plano=${plan.id}`;
+  const monthlyNote =
+    plan.interval === "year"
+      ? `cerca de ${formatBrlFromCents(Math.round(plan.amountCents / 12))} por mês, cobrado uma vez por ano`
+      : null;
+
   return (
-    <article className={`card price-card${wide ? " price-card-wide" : ""}`}>
-      <p className="tiny">Compra única · pessoa física</p>
-      <h2>{LIFETIME.name}</h2>
-      <p className="price-badge">Compra única · acesso vitalício</p>
-      <p className="muted">{LIFETIME.promise}</p>
+    <article className={`card price-card${plan.featured ? " featured" : ""}`}>
+      <p className="tiny">Assinatura de segurança</p>
+      <p className="price-badge">{plan.badge}</p>
+      <h2>{plan.name}</h2>
+      <p className="muted">{plan.promise}</p>
       <ul className="price-seals">
-        {LIFETIME.seals.map((seal) => (
+        {plan.seals.map((seal) => (
           <li key={seal}>{seal}</li>
         ))}
       </ul>
-      <PriceBenefits />
-      <p className="tiny">
-        Compra única processada pela Stripe, em nome da Guardian Proteção. Acesso vitalício,
-        com 5 anos de atualização do serviço. Sem mensalidade e sem renovação.
-      </p>
+      <PriceBenefits items={plan.benefits} />
       <div className="price-tail">
-        <p className="price-big">{PRICE_LABEL}</p>
-        <p className="price-note">
-          pagamento único, ou {LIFETIME.installmentCount}x de {INSTALLMENT_LABEL}
+        <p className="price-big">{price}</p>
+        <p className="price-note">{plan.intervalLabel}</p>
+        {monthlyNote ? <p className="tiny">{monthlyNote}</p> : null}
+        <p className="tiny">
+          Cobrança recorrente pela Stripe, em nome da Guardian Proteção. A proteção fica ativa
+          enquanto a assinatura estiver em dia.
         </p>
-        {error ? <p className="error">{error}</p> : null}
         {action === "pay" ? (
           <div className="cta-row">
-            <button className="btn btn-blue full" onClick={onPay} disabled={loading} type="button">
-              {loading ? "Abrindo Stripe..." : `Pagar ${PRICE_LABEL} no Stripe`}
+            <button
+              className="btn btn-blue full"
+              onClick={() => onPay?.(plan.id)}
+              disabled={disabled || loading}
+              type="button"
+            >
+              {loading ? "Abrindo Stripe..." : `Assinar ${price}`}
             </button>
           </div>
         ) : (
           <div className="cta-row">
-            <Link className="btn btn-blue full" href="/cadastro?next=/painel">
-              Criar conta e testar {DEFAULT_TRIAL_DAYS} dias grátis
+            <Link className="btn btn-blue full" href={`/cadastro?next=${encodeURIComponent(next)}`}>
+              Assinar este plano
             </Link>
-            <p className="tiny full trial-note">
-              Teste de {DEFAULT_TRIAL_DAYS} dias sem cartão de crédito
-            </p>
-            <Link className="btn btn-purple full" href="/cadastro?next=/pagamento">
-              Comprar agora no Stripe
-            </Link>
-            <Link className="btn btn-ghost full" href="/login?next=/pagamento">
+            <Link className="btn btn-ghost full" href={`/login?next=${encodeURIComponent(next)}`}>
               Já tenho conta
             </Link>
           </div>

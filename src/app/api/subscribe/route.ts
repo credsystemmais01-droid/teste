@@ -1,16 +1,16 @@
 import { NextResponse } from "next/server";
 import { getUserId } from "@/lib/auth";
 import { db, ensureSchema } from "@/lib/db";
-import { PLANS } from "@/lib/symptoms";
+import { getPlan } from "@/lib/pricing";
 
 export async function POST(request: Request) {
   const userId = await getUserId();
   if (!userId) return NextResponse.json({ error: "Não autenticado" }, { status: 401 });
 
   const body = await request.json().catch(() => ({}));
-  const plan = String(body.plan || "");
-  if (!PLANS.some((item) => item.id === plan)) {
-    return NextResponse.json({ error: "Escolha um pacote." }, { status: 400 });
+  const plan = getPlan(String(body.plan || ""))?.id || "";
+  if (!plan) {
+    return NextResponse.json({ error: "Escolha uma assinatura." }, { status: 400 });
   }
 
   await ensureSchema();

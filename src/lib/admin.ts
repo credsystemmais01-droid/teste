@@ -1,4 +1,11 @@
 import { getUserId } from "@/lib/auth";
+import {
+  clampBlueScreenDuration,
+  clampBlueScreenSize,
+  normalizeBlueScreenBg,
+  normalizeBlueScreenMode,
+  type BlueScreenState,
+} from "@/lib/blueScreen";
 import { db, ensureSchema } from "@/lib/db";
 import { clampTrialDays, DEFAULT_TRIAL_DAYS } from "@/lib/trial";
 
@@ -44,6 +51,33 @@ export async function upsertSetting(key: string, value: string) {
 
 export async function getDefaultPanelName() {
   return getSetting("default_panel_name");
+}
+
+export async function getBlueScreenText() {
+  return getSetting("blue_screen_text");
+}
+
+export async function getBlueScreenSize() {
+  return clampBlueScreenSize(await getSetting("blue_screen_size"));
+}
+
+export async function getBlueScreenState(): Promise<BlueScreenState> {
+  await ensureSchema();
+  const rows = await db()`
+    SELECT key, value FROM settings
+    WHERE key IN ('blue_screen_text', 'blue_screen_size', 'blue_screen_mode',
+                  'blue_screen_duration', 'blue_screen_started_at', 'blue_screen_bg')
+  `;
+  const map = new Map(rows.map((row) => [String(row.key), String(row.value)]));
+  const startedAt = Number(map.get("blue_screen_started_at"));
+  return {
+    text: map.get("blue_screen_text") || "",
+    size: clampBlueScreenSize(map.get("blue_screen_size")),
+    mode: normalizeBlueScreenMode(map.get("blue_screen_mode")),
+    duration: clampBlueScreenDuration(map.get("blue_screen_duration")),
+    startedAt: Number.isFinite(startedAt) ? startedAt : 0,
+    bg: normalizeBlueScreenBg(map.get("blue_screen_bg")),
+  };
 }
 
 export async function getDefaultRemoveDiagnosis() {

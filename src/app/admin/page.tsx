@@ -5,6 +5,29 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Brand } from "@/components/Brand";
 import { Copyright } from "@/components/Copyright";
+import { BlueScreenView, useLiveBlueScreen } from "@/components/BlueScreen";
+import {
+  BLUE_SCREEN_BG_DEFAULT,
+  BLUE_SCREEN_BG_PRESETS,
+  normalizeBlueScreenBg,
+  BLUE_SCREEN_DURATION_DEFAULT,
+  BLUE_SCREEN_DURATION_MAX,
+  BLUE_SCREEN_DURATION_PRESETS,
+  BLUE_SCREEN_MODES,
+  BLUE_SCREEN_PRESETS,
+  BLUE_SCREEN_SIZE_DEFAULT,
+  BLUE_SCREEN_SIZE_MAX,
+  BLUE_SCREEN_SIZE_MIN,
+  blueScreenProgress,
+  clampBlueScreenDuration,
+  clampBlueScreenSize,
+  formatClock,
+  formatDurationLabel,
+  normalizeBlueScreenMode,
+  stepBlueScreenSize,
+  type BlueScreenMode,
+} from "@/lib/blueScreen";
+import { SITE_URL } from "@/lib/brand";
 
 type AdminTrial = {
   used: boolean;
@@ -40,7 +63,7 @@ const TIME_PRESETS = [5, 8, 15, 30, 60, 120, 180];
 const TRIAL_PRESETS = [3, 7, 14, 30];
 
 function trialLabel(trial: AdminTrial, paid: boolean) {
-  if (paid) return "acesso vitalício ativo";
+  if (paid) return "assinatura ativa";
   if (!trial.used) return "ainda não começou o teste";
   if (trial.active) return `teste rodando · ${trial.daysLeft} dia${trial.daysLeft > 1 ? "s" : ""} restante${trial.daysLeft > 1 ? "s" : ""}`;
   return "teste encerrado";
@@ -106,6 +129,27 @@ export default function AdminPage() {
   const [defaultLogReadSeconds, setDefaultLogReadSeconds] = useState("8");
   const [trialEnabled, setTrialEnabled] = useState(true);
   const [trialDays, setTrialDays] = useState("7");
+  const [blueScreenText, setBlueScreenText] = useState("");
+  const [blueScreenSize, setBlueScreenSize] = useState(BLUE_SCREEN_SIZE_DEFAULT);
+  const [blueScreenMode, setBlueScreenMode] = useState<BlueScreenMode>("text");
+  const [blueScreenBg, setBlueScreenBg] = useState(BLUE_SCREEN_BG_DEFAULT);
+  const [blueScreenDuration, setBlueScreenDuration] = useState(BLUE_SCREEN_DURATION_DEFAULT);
+  const live = useLiveBlueScreen(null);
+  const liveMode = live.state?.mode ?? "text";
+  const liveProgress = live.state ? blueScreenProgress(live.state, live.now) : null;
+  const liveStatus = !live.state
+    ? "Buscando o que está no ar…"
+    : liveMode === "text"
+      ? "No ar: só o texto, sem contagem."
+      : !live.state.startedAt
+        ? "No ar: contagem ainda não iniciada."
+        : liveProgress?.done
+          ? liveMode === "countdown"
+            ? "No ar: a contagem chegou a 00:00."
+            : "No ar: o carregamento chegou a 100%."
+          : liveMode === "countdown"
+            ? `No ar: faltam ${formatClock(liveProgress?.remainingSeconds ?? 0)}.`
+            : `No ar: ${liveProgress?.percent ?? 0}% concluído.`;
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [drafts, setDrafts] = useState<Record<string, UserDraft>>({});
   const [error, setError] = useState("");
@@ -132,6 +176,11 @@ export default function AdminPage() {
     setDefaultLogReadSeconds(String(data.defaultLogReadSeconds || 8));
     setTrialEnabled(data.trialEnabled !== false);
     setTrialDays(String(data.trialDays || 7));
+    setBlueScreenText(data.blueScreenText || "");
+    setBlueScreenSize(clampBlueScreenSize(data.blueScreenSize));
+    setBlueScreenMode(normalizeBlueScreenMode(data.blueScreenMode));
+    setBlueScreenBg(normalizeBlueScreenBg(data.blueScreenBg));
+    setBlueScreenDuration(clampBlueScreenDuration(data.blueScreenDuration));
     setUsers(data.users || []);
     setDrafts(
       Object.fromEntries(
@@ -160,6 +209,40 @@ export default function AdminPage() {
       ...current,
       [userId]: { ...current[userId], ...next },
     }));
+  }
+
+  async function saveBlueScreen(onlyRestart = false) {
+    setError("");
+    const body = onlyRestart
+      ? { blueScreenRestart: true }
+      : {
+          blueScreenText,
+          blueScreenSize,
+          blueScreenMode,
+          blueScreenDuration,
+          blueScreenBg,
+          blueScreenRestart: blueScreenMode !== "text",
+        };
+    const response = await fetch("/api/admin/settings", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+    if (!response.ok) {
+      setError("Não foi possível salvar a tela azul.");
+      return;
+    }
+    const mode = onlyRestart ? liveMode : blueScreenMode;
+    setSaved(
+      onlyRestart
+        ? "Contagem reiniciada. Quem está com o link aberto vê começar do zero."
+        : mode === "countdown"
+          ? `Salvo. A contagem de ${formatDurationLabel(blueScreenDuration)} começou agora no link público.`
+          : mode === "loading"
+            ? `Salvo. O carregamento de ${formatDurationLabel(blueScreenDuration)} começou agora no link público.`
+            : "Salvo. O link público mostra só o texto.",
+    );
+    await Promise.all([load(), live.refresh()]);
   }
 
   async function saveDefaults() {
@@ -196,7 +279,7 @@ export default function AdminPage() {
     const message = {
       start: "Teste iniciado agora para esta conta.",
       reset: "Teste liberado de novo. A conta pode começar um teste novo.",
-      end: "Teste encerrado. A conta volta a precisar do acesso vitalício.",
+      end: "Teste encerrado. A conta volta a precisar de uma assinatura.",
     }[trialAction];
     setSaved(message);
     await load();
@@ -250,6 +333,242 @@ export default function AdminPage() {
 
       {error ? <p className="error">{error}</p> : null}
       {saved ? <p className="muted">{saved}</p> : null}
+
+      <section className="card form admin-defaults">
+        <h2>Tela azul</h2>
+        <p className="muted">
+          Esse texto aparece em letras brancas grandes, numa página só de fundo azul. Ela não entra
+          no menu do site. O que você salvar fica guardado e qualquer pessoa com o link vê.
+        </p>
+        <div className="field">
+          <label htmlFor="blueScreenText">Texto da tela</label>
+          <textarea
+            id="blueScreenText"
+            value={blueScreenText}
+            maxLength={5000}
+            rows={6}
+            onChange={(event) => setBlueScreenText(event.target.value)}
+            placeholder="Escreva a mensagem que vai aparecer na tela azul."
+          />
+        </div>
+        <div className="field" style={{ margin: 0 }}>
+          <label>Tamanho das letras</label>
+          <p className="admin-help">
+            Vai de {BLUE_SCREEN_SIZE_MIN} até {BLUE_SCREEN_SIZE_MAX}. O número é o tamanho numa tela
+            de 1920 px de largura; em telas menores ou maiores as letras acompanham. Salve para
+            valer no link público.
+          </p>
+          <div className="blue-size-row">
+            <button
+              className="btn btn-ghost"
+              type="button"
+              disabled={blueScreenSize <= BLUE_SCREEN_SIZE_MIN}
+              onClick={() => setBlueScreenSize((current) => stepBlueScreenSize(current, -1))}
+            >
+              Diminuir
+            </button>
+            <input
+              className="blue-size-range"
+              type="range"
+              aria-label="Tamanho das letras"
+              min={BLUE_SCREEN_SIZE_MIN}
+              max={BLUE_SCREEN_SIZE_MAX}
+              step={1}
+              value={blueScreenSize}
+              onChange={(event) => setBlueScreenSize(clampBlueScreenSize(event.target.value))}
+            />
+            <button
+              className="btn btn-ghost"
+              type="button"
+              disabled={blueScreenSize >= BLUE_SCREEN_SIZE_MAX}
+              onClick={() => setBlueScreenSize((current) => stepBlueScreenSize(current, 1))}
+            >
+              Aumentar
+            </button>
+            <strong className="blue-size-value">{blueScreenSize}</strong>
+          </div>
+          <div className="time-presets">
+            {BLUE_SCREEN_PRESETS.map((preset) => (
+              <button
+                key={preset.size}
+                className={`btn btn-ghost time-chip${blueScreenSize === preset.size ? " selected" : ""}`}
+                type="button"
+                onClick={() => setBlueScreenSize(preset.size)}
+              >
+                {preset.label}
+              </button>
+            ))}
+            <button
+              className={`btn btn-ghost time-chip${blueScreenSize === BLUE_SCREEN_SIZE_DEFAULT ? " selected" : ""}`}
+              type="button"
+              onClick={() => setBlueScreenSize(BLUE_SCREEN_SIZE_DEFAULT)}
+            >
+              Padrão
+            </button>
+          </div>
+        </div>
+        <div className="field" style={{ margin: 0 }}>
+          <label>Cor de fundo</label>
+          <p className="admin-help">
+            Escolha uma cor pronta ou qualquer outra no seletor. Em fundo claro as letras ficam
+            pretas sozinhas, para dar para ler.
+          </p>
+          <div className="blue-mode-row">
+            {BLUE_SCREEN_BG_PRESETS.map((preset) => (
+              <button
+                key={preset.color}
+                className={`btn btn-ghost time-chip bg-chip${blueScreenBg === preset.color ? " selected" : ""}`}
+                type="button"
+                onClick={() => setBlueScreenBg(preset.color)}
+              >
+                <span className="bg-swatch" style={{ background: preset.color }} />
+                {preset.label}
+              </button>
+            ))}
+            <label className="btn btn-ghost time-chip bg-chip">
+              <input
+                type="color"
+                className="bg-picker"
+                aria-label="Outra cor"
+                value={blueScreenBg}
+                onChange={(event) => setBlueScreenBg(normalizeBlueScreenBg(event.target.value))}
+              />
+              Outra cor
+            </label>
+          </div>
+          <p className="muted" style={{ margin: 0 }}>
+            Cor escolhida: {blueScreenBg.toUpperCase()}
+          </p>
+        </div>
+        <div className="field" style={{ margin: 0 }}>
+          <label>Contagem na tela</label>
+          <p className="admin-help">
+            Escolha o que aparece embaixo do texto. A contagem começa do zero na hora em que você
+            salva, e todo mundo com o link vê o mesmo tempo.
+          </p>
+          <div className="blue-mode-row">
+            {BLUE_SCREEN_MODES.map((mode) => (
+              <button
+                key={mode.id}
+                className={`btn btn-ghost time-chip${blueScreenMode === mode.id ? " selected" : ""}`}
+                type="button"
+                onClick={() => setBlueScreenMode(mode.id)}
+              >
+                {mode.label}
+              </button>
+            ))}
+          </div>
+        </div>
+        {blueScreenMode !== "text" ? (
+          <div className="field" style={{ margin: 0 }}>
+            <label htmlFor="blueScreenMinutes">
+              {blueScreenMode === "countdown" ? "Tempo da contagem" : "Tempo até chegar a 100%"}
+            </label>
+            <div className="blue-size-row">
+              <input
+                id="blueScreenMinutes"
+                type="number"
+                min={0}
+                max={BLUE_SCREEN_DURATION_MAX / 60}
+                value={Math.floor(blueScreenDuration / 60)}
+                onChange={(event) =>
+                  setBlueScreenDuration(
+                    clampBlueScreenDuration(
+                      Math.max(0, Number(event.target.value) || 0) * 60 + (blueScreenDuration % 60),
+                    ),
+                  )
+                }
+                style={{ width: 110 }}
+              />
+              <span className="muted">min</span>
+              <input
+                aria-label="Segundos"
+                type="number"
+                min={0}
+                max={59}
+                value={blueScreenDuration % 60}
+                onChange={(event) =>
+                  setBlueScreenDuration(
+                    clampBlueScreenDuration(
+                      Math.floor(blueScreenDuration / 60) * 60 +
+                        Math.min(59, Math.max(0, Number(event.target.value) || 0)),
+                    ),
+                  )
+                }
+                style={{ width: 90 }}
+              />
+              <span className="muted">s</span>
+            </div>
+            <div className="time-presets">
+              {BLUE_SCREEN_DURATION_PRESETS.map((seconds) => (
+                <button
+                  key={seconds}
+                  className={`btn btn-ghost time-chip${blueScreenDuration === seconds ? " selected" : ""}`}
+                  type="button"
+                  onClick={() => setBlueScreenDuration(seconds)}
+                >
+                  {formatDurationLabel(seconds)}
+                </button>
+              ))}
+            </div>
+            <p className="muted" style={{ margin: 0 }}>
+              {blueScreenMode === "countdown"
+                ? `Mostra ${formatClock(blueScreenDuration)} descendo até 00:00.`
+                : `Mostra de 0% a 100% em ${formatDurationLabel(blueScreenDuration)}, com barra.`}
+            </p>
+          </div>
+        ) : null}
+        <div className="blue-monitor">
+          <div className="blue-monitor-pane">
+            <p className="blue-monitor-title">
+              <span className="live-dot" /> Ao vivo agora, no link público
+            </p>
+            {live.state ? (
+              <BlueScreenView state={live.state} now={live.now} preview />
+            ) : (
+              <div className="blue-screen-preview blue-monitor-empty">Carregando a tela…</div>
+            )}
+            <p className="muted" style={{ margin: 0 }}>{liveStatus}</p>
+          </div>
+          <div className="blue-monitor-pane">
+            <p className="blue-monitor-title">Prévia do que você está editando</p>
+            <BlueScreenView
+              state={{
+                text: blueScreenText || "Assim ficam as letras",
+                size: blueScreenSize,
+                mode: blueScreenMode,
+                duration: blueScreenDuration,
+                startedAt: 0,
+                bg: blueScreenBg,
+              }}
+              now={0}
+              preview
+            />
+            <p className="muted" style={{ margin: 0 }}>
+              Só vai para o link quando você salvar.
+            </p>
+          </div>
+        </div>
+        <p className="muted">
+          Link público:{" "}
+          <a href={`${SITE_URL}/tela`} target="_blank" rel="noreferrer">
+            {SITE_URL}/tela
+          </a>
+        </p>
+        <div className="cta-row" style={{ marginTop: 0 }}>
+          <button className="btn btn-blue" type="button" onClick={() => saveBlueScreen()}>
+            {blueScreenMode === "text" ? "Salvar tela azul" : "Salvar e começar a contagem"}
+          </button>
+          {liveMode !== "text" ? (
+            <button className="btn btn-ghost" type="button" onClick={() => saveBlueScreen(true)}>
+              Reiniciar contagem
+            </button>
+          ) : null}
+          <a className="btn btn-ghost" href="/tela" target="_blank" rel="noreferrer">
+            Abrir a tela
+          </a>
+        </div>
+      </section>
 
       <section className="card form admin-defaults">
         <h2>Padrão para todo mundo</h2>

@@ -14,9 +14,9 @@ export async function GET(request: Request) {
 
   const session = await stripe.checkout.sessions.retrieve(sessionId);
   const userId = String(session.metadata?.userId || session.client_reference_id || (await getUserId()) || "");
-  const paid = session.payment_status === "paid";
+  const paid = session.payment_status === "paid" || session.status === "complete";
   if (userId && paid) {
-    await activatePaidPlan(userId, session.id);
+    await activatePaidPlan(userId, session.id, String(session.metadata?.plan || ""));
     return NextResponse.redirect(new URL("/painel?view=safe", origin));
   }
 

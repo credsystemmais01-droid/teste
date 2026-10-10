@@ -2,13 +2,12 @@ export function PackageInfo() {
   return (
     <section className="package-info">
       <div className="pay-hero">
-        <p className="tiny">O que entra na compra única</p>
-        <h2>Antes do valor, o que você recebe</h2>
+        <p className="tiny">O que entra na assinatura</p>
+        <h2>Antes do plano, o que a segurança cobre</h2>
         <p className="muted">
-          O pacote Guardian Proteção é uma compra única, de acesso vitalício. Você paga uma
-          só vez e o painel Limpa e Protege fica seu para sempre, com 5 anos de atualização
-          do serviço: limpa, protege e acompanha o computador e o notebook — 24 horas, sem
-          parar, sem mensalidade e sem renovação.
+          As três assinaturas ligam o painel Limpa e Protege enquanto o plano estiver ativo:
+          criptografia dos dados, vigilância 24 horas no computador e no notebook, e cuidado
+          contra hacker, malware e trojan. O alcance muda conforme o plano escolhido.
         </p>
       </div>
 
@@ -44,8 +43,8 @@ export function PackageInfo() {
           <p className="tiny">Sistema Guardião</p>
           <h3>Escudo 24 horas no painel</h3>
           <p className="muted">
-            O Guardião acompanha a máquina, o diagnóstico e o pacote. Depois de
-            ativar, o painel fica em estado protegido para sempre.
+            O Guardião acompanha a máquina, o diagnóstico e a assinatura. Depois de
+            ativar, o painel fica em estado protegido enquanto o plano estiver ativo.
           </p>
         </article>
         <article className="card info-block">
@@ -57,11 +56,11 @@ export function PackageInfo() {
           </p>
         </article>
         <article className="card info-block">
-          <p className="tiny">Máquina segura sempre</p>
-          <h3>Vigilância que não acaba</h3>
+          <p className="tiny">Máquina segura</p>
+          <h3>Vigilância no período da assinatura</h3>
           <p className="muted">
-            Manter máquina segura deixa o escudo permanente ligado no computador e
-            no notebook. Você comprou uma vez; a proteção não tem data de fim.
+            Manter máquina segura deixa o escudo ligado no computador e no notebook
+            durante toda a assinatura, no mês ou no ano contratado.
           </p>
         </article>
         <article className="card info-block">
@@ -97,8 +96,8 @@ export function PackageInfo() {
           <li>Você cria a conta com nome, CPF, WhatsApp e e-mail — ou entra com o Google.</li>
           <li>No painel, informa a máquina e marca os sintomas do diagnóstico.</li>
           <li>O console mostra a leitura e o log do Guardião.</li>
-          <li>No checkout, você ativa a compra permanente. A cobrança sai pela Stripe, em nome da Guardian Proteção.</li>
-          <li>Depois do pagamento, o painel fica protegido para sempre, sem renovar nada.</li>
+          <li>No checkout, você escolhe uma das três assinaturas. A cobrança sai pela Stripe, em nome da Guardian Proteção.</li>
+          <li>Depois do pagamento, o painel fica protegido enquanto a assinatura estiver ativa.</li>
         </ol>
       </article>
     </section>

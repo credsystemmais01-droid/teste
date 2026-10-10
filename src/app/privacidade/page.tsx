@@ -26,7 +26,7 @@ export default function PrivacidadePage() {
 
         <h2>1. Quem é responsável</h2>
         <p>
-          O responsável pelos dados é a {COMPANY}, que comercializa o pacote permanente {PRODUCT}.
+          O responsável pelos dados é a {COMPANY}, que comercializa as assinaturas de segurança do {PRODUCT}.
           Para falar sobre privacidade, use o e-mail {SUPPORT_EMAIL} ou a página{" "}
           <Link href="/suporte">de atendimento</Link>.
         </p>
@@ -59,7 +59,7 @@ export default function PrivacidadePage() {
         <ul>
           <li>Criar e autenticar a sua conta.</li>
           <li>Mostrar o painel, o diagnóstico e o estado da proteção.</li>
-          <li>Identificar o pagamento único na Stripe, em nome da {COMPANY}.</li>
+          <li>Identificar a assinatura na Stripe, em nome da {COMPANY}.</li>
           <li>Atender suporte, estorno e exigência legal.</li>
           <li>Melhorar o site e evitar abuso da conta.</li>
         </ul>
