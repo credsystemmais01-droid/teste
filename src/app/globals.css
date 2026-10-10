@@ -712,7 +712,13 @@ button, input, textarea { font: inherit; }
   font-weight: 700;
   letter-spacing: -0.04em;
 }
-.gw-thanks ul { margin: 12px 0 20px; padding-left: 18px; color: #3c4257; line-height: 1.55; }
+.gw-receipt { margin: 16px 0 4px; border-top: 1px solid #e6ebf1; }
+.gw-receipt div { display: flex; justify-content: space-between; gap: 16px; padding: 10px 0; border-bottom: 1px solid #eef2f6; }
+.gw-receipt dt { color: #6b7c93; font-size: 13px; }
+.gw-receipt dd { margin: 0; font-weight: 700; text-align: right; }
+.gw-services-label { margin: 14px 0 0; font-size: 12px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: #6b7c93; }
+.gw-thanks ul,
+.gw-bank ul { margin: 12px 0 20px; padding-left: 18px; color: #3c4257; line-height: 1.55; }
 .gw-thanks li { margin: 6px 0; }
 .gw-thanks-btn {
   display: inline-flex;

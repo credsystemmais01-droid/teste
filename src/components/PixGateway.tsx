@@ -42,6 +42,7 @@ export function PixGateway() {
   const payload = usePixPayload(chargeId);
   const [copied, setCopied] = useState(false);
   const [phase, setPhase] = useState<"wait" | "processing" | "paid">("wait");
+  const [paidAt, setPaidAt] = useState<string | null>(null);
 
   useEffect(() => {
     if (!chargeId || phase !== "wait") return;
@@ -54,7 +55,10 @@ export function PixGateway() {
         });
         if (!response.ok) return;
         const data = await response.json();
-        if (!stop && data.paid) setPhase("processing");
+        if (!stop && data.paid) {
+          setPaidAt(typeof data.paidAt === "string" && data.paidAt ? data.paidAt : new Date().toISOString());
+          setPhase("processing");
+        }
       } catch {
         // A tela segue aguardando a leitura do QR.
       }
@@ -142,6 +146,7 @@ export function PixGateway() {
                 <li>Banco processando o Pix</li>
                 <li>Liberando os serviços</li>
               </ol>
+              <PixReceipt when={paidAt} />
             </div>
           ) : paid ? (
             <div className="gw-thanks">
@@ -149,11 +154,7 @@ export function PixGateway() {
               <h2>Obrigado pelo pagamento</h2>
               <p className="gw-thanks-price">{price}</p>
               <p>Seus serviços estão disponíveis.</p>
-              <ul>
-                {SERVICES.map((item) => (
-                  <li key={item}>{item}</li>
-                ))}
-              </ul>
+              <PixReceipt when={paidAt} />
               <Link className="gw-thanks-btn" href="/painel">
                 Ir para os serviços
               </Link>
@@ -201,6 +202,49 @@ export function PixGateway() {
           )}
         </section>
       </div>
+    </div>
+  );
+}
+
+function formatPixWhen(iso: string | null) {
+  if (!iso) return "Agora";
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return "Agora";
+  return new Intl.DateTimeFormat("pt-BR", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  })
+    .format(date)
+    .replace(",", " às");
+}
+
+function PixReceipt({ when }: { when: string | null }) {
+  const price = formatBrlFromCents(PIX_DEMO_CENTS);
+  return (
+    <div>
+      <dl className="gw-receipt">
+        <div>
+          <dt>Nome do serviço</dt>
+          <dd>{PIX_DEMO_NAME}</dd>
+        </div>
+        <div>
+          <dt>Valor do Pix</dt>
+          <dd>{price}</dd>
+        </div>
+        <div>
+          <dt>Horário</dt>
+          <dd>{formatPixWhen(when)}</dd>
+        </div>
+      </dl>
+      <p className="gw-services-label">Serviços</p>
+      <ul>
+        {SERVICES.map((item) => (
+          <li key={item}>{item}</li>
+        ))}
+      </ul>
     </div>
   );
 }
