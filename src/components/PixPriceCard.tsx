@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { PixLiveQr } from "@/components/PixLiveQr";
 import { PriceBenefits } from "@/components/PriceBenefits";
 import { PIX_DEMO_CENTS, PIX_DEMO_NAME } from "@/lib/pixDemo";
 import { formatBrlFromCents } from "@/lib/pricing";
@@ -31,17 +30,14 @@ export function PixPriceCard() {
       </ul>
       <PriceBenefits items={BENEFITS} />
       <div className="price-tail">
-        <div className="pix-qr-frame">
-          <PixLiveQr size={168} />
-        </div>
         <p className="price-big">{price}</p>
         <p className="price-note">por ano</p>
         <p className="tiny">
-          Aponte a câmera no QR, ou abra o pagamento e aponte lá. O valor sai da conta e os
-          serviços ficam disponíveis.
+          Cada conta abre o próprio checkout. Aponte a câmera no QR dessa tela para o valor sair
+          do saldo e os serviços ficarem disponíveis.
         </p>
         <div className="cta-row">
-          <Link className="btn btn-blue full" href="/pix">
+          <Link className="btn btn-blue full" href="/pix?novo=1">
             Pagar com Pix
           </Link>
         </div>

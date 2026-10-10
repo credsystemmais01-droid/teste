@@ -9,7 +9,8 @@ function withCors(response: NextResponse) {
   return response;
 }
 
-export async function GET() {
-  const payment = await readPixPayment();
+export async function GET(request: Request) {
+  const chargeId = new URL(request.url).searchParams.get("id") || "";
+  const payment = await readPixPayment(chargeId);
   return withCors(NextResponse.json(payment));
 }

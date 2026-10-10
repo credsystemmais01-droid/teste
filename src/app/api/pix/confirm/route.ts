@@ -21,7 +21,7 @@ export async function POST(request: Request) {
   if (!payment) {
     return withCors(NextResponse.json({ error: "Pagamento não reconhecido." }, { status: 400 }));
   }
-  const current = await readPixPayment();
-  const saved = current.paid ? current : await markPixPaid(payment.cents, payment.name);
+  const current = await readPixPayment(payment.chargeId);
+  const saved = current.paid ? current : await markPixPaid(payment.chargeId, payment.cents, payment.name);
   return withCors(NextResponse.json(saved));
 }

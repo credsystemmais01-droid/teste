@@ -1,20 +1,15 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { PixQr } from "@/components/PixQr";
 import { buildPixPayload } from "@/lib/pixDemo";
 
-export function usePixPayload() {
-  const [payload, setPayload] = useState(() => buildPixPayload());
+export function usePixPayload(chargeId: string) {
+  const [payload, setPayload] = useState("");
 
   useEffect(() => {
-    setPayload(buildPixPayload(window.location.origin));
-  }, []);
+    if (!chargeId) return;
+    setPayload(buildPixPayload(window.location.origin, chargeId));
+  }, [chargeId]);
 
   return payload;
-}
-
-export function PixLiveQr({ size }: { size: number }) {
-  const payload = usePixPayload();
-  return <PixQr value={payload} size={size} alt="QR Code Pix" />;
 }

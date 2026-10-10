@@ -7,8 +7,6 @@ export type PixPaymentState = {
   paidAt: string | null;
 };
 
-const KEY = "pix_payment";
-
 const empty: PixPaymentState = {
   paid: false,
   cents: 0,
@@ -16,20 +14,31 @@ const empty: PixPaymentState = {
   paidAt: null,
 };
 
-export async function readPixPayment(): Promise<PixPaymentState> {
+function chargeKey(chargeId: string) {
+  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(chargeId)) {
+    return null;
+  }
+  return `pix_charge_${chargeId}`;
+}
+
+export async function readPixPayment(chargeId: string): Promise<PixPaymentState> {
+  const key = chargeKey(chargeId);
+  if (!key) return empty;
   await ensureSchema();
-  const rows = await db()`SELECT value FROM settings WHERE key = ${KEY} LIMIT 1`;
+  const rows = await db()`SELECT value FROM settings WHERE key = ${key} LIMIT 1`;
   if (!rows[0]) return empty;
   try {
     const data = JSON.parse(String(rows[0].value)) as PixPaymentState;
-    if (!data || typeof data.paid !== "boolean") return empty;
+    if (!data || data.paid !== true) return empty;
     return data;
   } catch {
     return empty;
   }
 }
 
-export async function markPixPaid(cents: number, name: string): Promise<PixPaymentState> {
+export async function markPixPaid(chargeId: string, cents: number, name: string): Promise<PixPaymentState> {
+  const key = chargeKey(chargeId);
+  if (!key) return empty;
   await ensureSchema();
   const next: PixPaymentState = {
     paid: true,
@@ -40,7 +49,7 @@ export async function markPixPaid(cents: number, name: string): Promise<PixPayme
   const value = JSON.stringify(next);
   await db()`
     INSERT INTO settings (key, value)
-    VALUES (${KEY}, ${value})
+    VALUES (${key}, ${value})
     ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value
   `;
   return next;

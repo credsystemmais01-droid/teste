@@ -14,18 +14,44 @@ const SERVICES = [
   "Internet, checagem e log do Guardião.",
 ];
 
+const CHARGE_KEY = "pix-charge-id";
+
+function useCheckoutCharge() {
+  const [chargeId, setChargeId] = useState("");
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const startNew = params.get("novo") === "1";
+    let id = startNew ? "" : sessionStorage.getItem(CHARGE_KEY) || "";
+    if (!id) {
+      id = crypto.randomUUID();
+      sessionStorage.setItem(CHARGE_KEY, id);
+    }
+    if (startNew) {
+      window.history.replaceState(null, "", "/pix");
+    }
+    setChargeId(id);
+  }, []);
+
+  return chargeId;
+}
+
 export function PixGateway() {
   const price = formatBrlFromCents(PIX_DEMO_CENTS);
-  const payload = usePixPayload();
+  const chargeId = useCheckoutCharge();
+  const payload = usePixPayload(chargeId);
   const [copied, setCopied] = useState(false);
   const [paid, setPaid] = useState(false);
 
   useEffect(() => {
+    if (!chargeId) return;
     let stop = false;
 
     async function look() {
       try {
-        const response = await fetch("/api/pix/status", { cache: "no-store" });
+        const response = await fetch(`/api/pix/status?id=${encodeURIComponent(chargeId)}`, {
+          cache: "no-store",
+        });
         if (!response.ok) return;
         const data = await response.json();
         if (!stop && data.paid) setPaid(true);
@@ -40,7 +66,7 @@ export function PixGateway() {
       stop = true;
       window.clearInterval(timer);
     };
-  }, []);
+  }, [chargeId]);
 
   async function copyPayload() {
     try {
@@ -125,7 +151,7 @@ export function PixGateway() {
               <div className="gw-pix">
                 <p className="gw-pix-title">Escaneie o QR para pagar</p>
                 <div className="pix-qr-frame gw-qr">
-                  <PixQr value={payload} size={232} alt="QR Code Pix" />
+                  {payload ? <PixQr value={payload} size={232} alt="QR Code Pix" /> : null}
                 </div>
                 <p className="gw-help">
                   No app da conta, toque em Pix e aponte a câmera para este código. O saldo desce{" "}
