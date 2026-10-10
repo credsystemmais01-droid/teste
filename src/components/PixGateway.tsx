@@ -184,8 +184,8 @@ export function PixGateway() {
                   {payload ? <PixQr value={payload} size={232} alt="QR Code Pix" /> : null}
                 </div>
                 <p className="gw-help">
-                  No app da conta, toque em Pix e aponte a câmera para este código. O saldo desce{" "}
-                  {price} e esta tela agradece o pagamento.
+                  No app da conta, toque em Pix e aponte a câmera. Confirme o pagamento no botão que
+                  sobe embaixo. O saldo desce {price} e o banco processa o Pix nesta tela.
                 </p>
                 <label className="gw-copy-label" htmlFor="pix-code">
                   Pix copia e cola
